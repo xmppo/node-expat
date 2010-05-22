@@ -19,8 +19,11 @@ function collapseTexts(evs) {
     return r;
 }
 
+var tests = 0, iterations = 0, fails = 0;
 function expect(s, evs_expected) {
+    tests++;
     for(var step = s.length; step > 0; step--) {
+	iterations++;
 	var evs_received = [];
 	var p = new expat.Parser();
 	p.addListener('startElement', function(name, attrs) {
@@ -41,9 +44,11 @@ function expect(s, evs_expected) {
 	var expected = JSON.stringify(evs_expected);
 	var received = JSON.stringify(collapseTexts(evs_received));
 	if (expected != received) {
+	    fails++;
 	    sys.puts("Fail for: " + s + " (step=" + step + ")");
 	    sys.puts("Expected: " + expected);
 	    sys.puts("Received: " + received);
+	    return;  // don't try with smaller step size
 	}
     }
 }
@@ -80,3 +85,5 @@ expect("<r>ß</r>",
        [['startElement', 'r', {}],
 	['text', "ß"],
 	['endElement', 'r']]);
+
+sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");
