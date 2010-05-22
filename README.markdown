@@ -3,7 +3,7 @@
 ## Motivation ##
 
 You use [node.js](http://github.com/ry/node) for speed? You process
-XML streams? Then you want the fastest XML parser: libexpat!
+XML streams? Then you want the fastest XML parser: [libexpat](http://expat.sourceforge.net/)!
 
 ## Speed ##
 
@@ -16,3 +16,24 @@ A stupid speed test is supplied in `bench.js`. We measure how many
 
 These numbers were recorded on a Core 2 2400 MHz and may turn out to
 be bullshit, given my few node.js experience.
+
+## Instructions ##
+
+    node-waf configure
+    node-waf build
+
+For using the library, make sure `build/default/expat.node` is in
+either `$NODE_PATH` or `require.paths`.
+
+So far, three events are emitted by a parser:
+* *startElement* with `name, attrs`
+* *endElement* with `name`
+* *text* with `string`
+
+Use `test.js` for reference.
+
+## Namespace handling ##
+
+A word about special parsing of *xmlns:* this is not neccessary in a
+bare SAX parser like this, given that the DOM replacement you are
+using (if any) is not relevant to the parser.
