@@ -26,7 +26,6 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "parse", Parse);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
-    printf("initialized %i\n", t->GetFunction()->IsFunction());
 
     sym_startElement = NODE_PSYMBOL("startElement");
     sym_endElement = NODE_PSYMBOL("endElement");
@@ -57,7 +56,6 @@ protected:
 
   ~Parser()
   {
-    printf("dtor\n");
     XML_ParserFree(parser);
   }
 
