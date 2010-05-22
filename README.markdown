@@ -10,9 +10,9 @@ XML streams? Then you want the fastest XML parser: [libexpat](http://expat.sourc
 A stupid speed test is supplied in `bench.js`. We measure how many
 25-byte elements a SAX parser can process:
 
-* [node-xml](http://github.com/robrighter/node-xml) (pure JavaScript): 23000 el/s
-* [libxmljs](http://github.com/polotek/libxmljs) (libxml2 binding): 77000 el/s
-* [node-expat](http://github.com/astro/node-expat) (libexpat binding, this): 113000 el/s
+- [node-xml](http://github.com/robrighter/node-xml) (pure JavaScript): 23,000 el/s
+- [libxmljs](http://github.com/polotek/libxmljs) (libxml2 binding): 77,000 el/s
+- [node-expat](http://github.com/astro/node-expat) (libexpat binding, this): 113,000 el/s
 
 These numbers were recorded on a Core 2 2400 MHz and may turn out to
 be bullshit, given my few node.js experience.
@@ -26,9 +26,10 @@ For using the library, make sure `build/default/expat.node` is in
 either `$NODE_PATH` or `require.paths`.
 
 So far, three events are emitted by a parser:
-* *startElement* with `name, attrs`
-* *endElement* with `name`
-* *text* with `string`
+
+- *startElement* with `name, attrs`
+- *endElement* with `name`
+- *text* with `string`
 
 Use `test.js` for reference.
 
