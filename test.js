@@ -72,3 +72,11 @@ expect("<r><![CDATA[<greeting>Hello, world!</greeting>]]></r>",
        [['startElement', 'r', {}],
 	['text', "<greeting>Hello, world!</greeting>"],
 	['endElement', 'r']]);
+expect("<r>foo&amp;bar</r>",
+       [['startElement', 'r', {}],
+	['text', "foo&bar"],
+	['endElement', 'r']]);
+expect("<r>ß</r>",
+       [['startElement', 'r', {}],
+	['text', "ß"],
+	['endElement', 'r']]);
