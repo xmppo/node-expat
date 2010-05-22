@@ -7,6 +7,11 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
+static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts);
+static void EndElement(void *userData, const XML_Char *name);
+
+static Persistent<String> sym_startElement, sym_endElement;
+
 class Parser : public EventEmitter {
 public:
   static void Initialize(Handle<Object> target)
@@ -21,18 +26,19 @@ public:
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
     printf("initialized %i\n", t->GetFunction()->IsFunction());
+
+    sym_startElement = NODE_PSYMBOL("startElement");
+    sym_endElement = NODE_PSYMBOL("endElement");
   }
 
 protected:
   static Handle<Value> New(const Arguments& args)
   {
     HandleScope scope;
-    printf("new\n");
 
     Parser *parser = new Parser();
     parser->Wrap(args.This());
     
-    printf("newed\n");
     return args.This();
   }
 
@@ -41,11 +47,15 @@ protected:
   {
     parser = XML_ParserCreate(/*encoding*/ "UTF-8");
     assert(parser != NULL);
+
+    XML_SetUserData(parser, this);
+    XML_SetElementHandler(parser, StartElement, EndElement);
   }
 
   ~Parser()
   {
-    //assert(parser == NULL);
+    printf("dtor\n");
+    XML_ParserFree(parser);
   }
 
   static Handle<Value> Parse(const Arguments& args)
@@ -89,6 +99,30 @@ protected:
 private:
   XML_Parser parser;
 };
+
+
+static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts)
+{
+  Parser *parser = reinterpret_cast<Parser *>(userData);
+
+  /* Collect atts into JS object */
+  Local<Object> attr = Object::New();
+  for(const XML_Char **atts1 = atts; *atts1; atts1 += 2)
+    attr->Set(String::New(atts1[0]), String::New(atts1[1]));
+
+  /* Trigger event */
+  Handle<Value> argv[2] = { String::New(name), attr };
+  parser->Emit(sym_startElement, 2, argv);
+}
+
+static void EndElement(void *userData, const XML_Char *name)
+{
+  Parser *parser = reinterpret_cast<Parser *>(userData);
+
+  /* Trigger event */
+  Handle<Value> argv[1] = { String::New(name) };
+  parser->Emit(sym_endElement, 1, argv);
+}
 
 
 extern "C" void init(Handle<Object> target)
