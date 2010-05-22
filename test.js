@@ -39,3 +39,17 @@ expect("<r foo='bar' baz=\"quux\" test=\"tset\"/>",
 expect("<r xmlns='http://localhost/' xmlns:x=\"http://example.com/\"></r>",
        [['startElement', 'r', {xmlns: 'http://localhost/', 'xmlns:x': 'http://example.com/'}],
 	['endElement', 'r']]);
+expect("<r>foo</r>",
+       [['startElement', 'r', {}],
+	['text', "foo"],
+	['endElement', 'r']]);
+expect("<r>foo\nbar</r>",
+       [['startElement', 'r', {}],
+	['text', "foo"],
+	['text', "\n"],
+	['text', "bar"],
+	['endElement', 'r']]);
+expect("<r><![CDATA[<greeting>Hello, world!</greeting>]]></r>",
+       [['startElement', 'r', {}],
+	['text', "<greeting>Hello, world!</greeting>"],
+	['endElement', 'r']]);

@@ -9,8 +9,9 @@ using namespace node;
 
 static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts);
 static void EndElement(void *userData, const XML_Char *name);
+static void Text(void *userData, const XML_Char *s, int len);
 
-static Persistent<String> sym_startElement, sym_endElement;
+static Persistent<String> sym_startElement, sym_endElement, sym_text;
 
 class Parser : public EventEmitter {
 public:
@@ -29,6 +30,7 @@ public:
 
     sym_startElement = NODE_PSYMBOL("startElement");
     sym_endElement = NODE_PSYMBOL("endElement");
+    sym_text = NODE_PSYMBOL("text");
   }
 
 protected:
@@ -50,6 +52,7 @@ protected:
 
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, StartElement, EndElement);
+    XML_SetCharacterDataHandler(parser, Text);
   }
 
   ~Parser()
@@ -122,6 +125,15 @@ static void EndElement(void *userData, const XML_Char *name)
   /* Trigger event */
   Handle<Value> argv[1] = { String::New(name) };
   parser->Emit(sym_endElement, 1, argv);
+}
+
+static void Text(void *userData, const XML_Char *s, int len)
+{
+  Parser *parser = reinterpret_cast<Parser *>(userData);
+
+  /* Trigger event */
+  Handle<Value> argv[1] = { String::New(s, len) };
+  parser->Emit(sym_text, 1, argv);
 }
 
 
