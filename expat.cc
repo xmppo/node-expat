@@ -98,37 +98,40 @@ private:
 
   /*** SAX callbacks ***/
 
-  static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts)
-    {
-      Parser *parser = reinterpret_cast<Parser *>(userData);
+  static void StartElement(void *userData,
+                           const XML_Char *name, const XML_Char **atts)
+  {
+    Parser *parser = reinterpret_cast<Parser *>(userData);
 
-      /* Collect atts into JS object */
-      Local<Object> attr = Object::New();
-      for(const XML_Char **atts1 = atts; *atts1; atts1 += 2)
-        attr->Set(String::New(atts1[0]), String::New(atts1[1]));
+    /* Collect atts into JS object */
+    Local<Object> attr = Object::New();
+    for(const XML_Char **atts1 = atts; *atts1; atts1 += 2)
+      attr->Set(String::New(atts1[0]), String::New(atts1[1]));
 
-      /* Trigger event */
-      Handle<Value> argv[2] = { String::New(name), attr };
-      parser->Emit(sym_startElement, 2, argv);
-    }
+    /* Trigger event */
+    Handle<Value> argv[2] = { String::New(name), attr };
+    parser->Emit(sym_startElement, 2, argv);
+  }
 
-  static void EndElement(void *userData, const XML_Char *name)
-    {
-      Parser *parser = reinterpret_cast<Parser *>(userData);
+  static void EndElement(void *userData,
+                         const XML_Char *name)
+  {
+    Parser *parser = reinterpret_cast<Parser *>(userData);
 
-      /* Trigger event */
-      Handle<Value> argv[1] = { String::New(name) };
-      parser->Emit(sym_endElement, 1, argv);
-    }
+    /* Trigger event */
+    Handle<Value> argv[1] = { String::New(name) };
+    parser->Emit(sym_endElement, 1, argv);
+  }
 
-  static void Text(void *userData, const XML_Char *s, int len)
-    {
-      Parser *parser = reinterpret_cast<Parser *>(userData);
+  static void Text(void *userData,
+                   const XML_Char *s, int len)
+  {
+    Parser *parser = reinterpret_cast<Parser *>(userData);
 
-      /* Trigger event */
-      Handle<Value> argv[1] = { String::New(s, len) };
-      parser->Emit(sym_text, 1, argv);
-    }
+    /* Trigger event */
+    Handle<Value> argv[1] = { String::New(s, len) };
+    parser->Emit(sym_text, 1, argv);
+  }
 };
 
 
