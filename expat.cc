@@ -7,10 +7,6 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts);
-static void EndElement(void *userData, const XML_Char *name);
-static void Text(void *userData, const XML_Char *s, int len);
-
 static Persistent<String> sym_startElement, sym_endElement, sym_text;
 
 class Parser : public EventEmitter {
@@ -99,40 +95,42 @@ protected:
 
 private:
   XML_Parser parser;
+
+  /*** SAX callbacks ***/
+
+  static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts)
+    {
+      Parser *parser = reinterpret_cast<Parser *>(userData);
+
+      /* Collect atts into JS object */
+      Local<Object> attr = Object::New();
+      for(const XML_Char **atts1 = atts; *atts1; atts1 += 2)
+        attr->Set(String::New(atts1[0]), String::New(atts1[1]));
+
+      /* Trigger event */
+      Handle<Value> argv[2] = { String::New(name), attr };
+      parser->Emit(sym_startElement, 2, argv);
+    }
+
+  static void EndElement(void *userData, const XML_Char *name)
+    {
+      Parser *parser = reinterpret_cast<Parser *>(userData);
+
+      /* Trigger event */
+      Handle<Value> argv[1] = { String::New(name) };
+      parser->Emit(sym_endElement, 1, argv);
+    }
+
+  static void Text(void *userData, const XML_Char *s, int len)
+    {
+      Parser *parser = reinterpret_cast<Parser *>(userData);
+
+      /* Trigger event */
+      Handle<Value> argv[1] = { String::New(s, len) };
+      parser->Emit(sym_text, 1, argv);
+    }
 };
 
-
-static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
-  Parser *parser = reinterpret_cast<Parser *>(userData);
-
-  /* Collect atts into JS object */
-  Local<Object> attr = Object::New();
-  for(const XML_Char **atts1 = atts; *atts1; atts1 += 2)
-    attr->Set(String::New(atts1[0]), String::New(atts1[1]));
-
-  /* Trigger event */
-  Handle<Value> argv[2] = { String::New(name), attr };
-  parser->Emit(sym_startElement, 2, argv);
-}
-
-static void EndElement(void *userData, const XML_Char *name)
-{
-  Parser *parser = reinterpret_cast<Parser *>(userData);
-
-  /* Trigger event */
-  Handle<Value> argv[1] = { String::New(name) };
-  parser->Emit(sym_endElement, 1, argv);
-}
-
-static void Text(void *userData, const XML_Char *s, int len)
-{
-  Parser *parser = reinterpret_cast<Parser *>(userData);
-
-  /* Trigger event */
-  Handle<Value> argv[1] = { String::New(s, len) };
-  parser->Emit(sym_text, 1, argv);
-}
 
 
 extern "C" void init(Handle<Object> target)
