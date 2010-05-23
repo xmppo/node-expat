@@ -89,10 +89,7 @@ protected:
         isFinal = args[1]->IsTrue();
       }
 
-    if (parser->parse(**str, isFinal))
-      return scope.Close(False());
-    else
-      return scope.Close(True());
+    return scope.Close(parser->parse(**str, isFinal) ? True() : False());
   }
 
   bool parse(String &str, int isFinal)
@@ -101,9 +98,8 @@ protected:
     void *buf = XML_GetBuffer(parser, len);
     assert(buf != NULL);
     assert(str.WriteUtf8(static_cast<char *>(buf), len) == len);
-    assert(XML_ParseBuffer(parser, len, isFinal) != XML_STATUS_ERROR);
 
-    return true;
+    return XML_ParseBuffer(parser, len, isFinal) != 0;
   }
 
   static Handle<Value> SetEncoding(const Arguments& args)
@@ -120,7 +116,7 @@ protected:
 
         delete[] encoding;
 
-        return scope.Close(status != 0 ? True() : False());
+        return scope.Close(status ? True() : False());
       }
     else
       return False();
@@ -128,7 +124,7 @@ protected:
 
   int setEncoding(XML_Char *encoding)
   {
-    return XML_SetEncoding(parser, encoding);
+    return XML_SetEncoding(parser, encoding) != 0;
   }
 
 private:

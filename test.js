@@ -43,7 +43,10 @@ function expect(s, evs_expected) {
 	    evs_received.push(['comment', s]);
 	});
 	for(var l = 0; l < s.length; l += step)
-	    p.parse(s.substr(l, step), false);
+	{
+	    if (!p.parse(s.substr(l, step), false))
+		evs_received.push(['error']);
+	}
 
 	var expected = JSON.stringify(evs_expected);
 	var received = JSON.stringify(collapseTexts(evs_received));
@@ -93,5 +96,6 @@ expect("<?i like xml?>",
        [['processingInstruction', 'i', 'like xml']]);
 expect("<!-- no comment -->",
        [['comment', ' no comment ']]);
+expect("<&", [['error']]);
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");
