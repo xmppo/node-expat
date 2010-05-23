@@ -21,6 +21,7 @@ public:
     t->InstanceTemplate()->SetInternalFieldCount(1);
 
     NODE_SET_PROTOTYPE_METHOD(t, "parse", Parse);
+    NODE_SET_PROTOTYPE_METHOD(t, "setEncoding", SetEncoding);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
 
@@ -35,17 +36,24 @@ protected:
   static Handle<Value> New(const Arguments& args)
   {
     HandleScope scope;
+    XML_Char *encoding = NULL;
+    if (args.Length() == 1 && args[0]->IsString())
+      {
+        encoding = new XML_Char[32];
+        args[0]->ToString()->WriteAscii(encoding, 0, 32);
+      }
 
-    Parser *parser = new Parser();
+    Parser *parser = new Parser(encoding);
+    if (encoding)
+      delete[] encoding;
     parser->Wrap(args.This());
-    
     return args.This();
   }
 
-  Parser()
+  Parser(const XML_Char *encoding)
     : EventEmitter()
   {
-    parser = XML_ParserCreate(/*encoding*/ "UTF-8");
+    parser = XML_ParserCreate(encoding);
     assert(parser != NULL);
 
     XML_SetUserData(parser, this);
@@ -98,8 +106,37 @@ protected:
     return true;
   }
 
+  static Handle<Value> SetEncoding(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    if (args.Length() == 1 && args[0]->IsString())
+      {
+        XML_Char *encoding = new XML_Char[32];
+        args[0]->ToString()->WriteAscii(encoding, 0, 32);
+
+        int status = parser->setEncoding(encoding);
+
+        delete[] encoding;
+
+        return scope.Close(status != 0 ? True() : False());
+      }
+    else
+      return False();
+  }
+
+  int setEncoding(XML_Char *encoding)
+  {
+    return XML_SetEncoding(parser, encoding);
+  }
+
 private:
+  /* expat instance */
   XML_Parser parser;
+
+  /* no default ctor */
+  Parser();
 
   /*** SAX callbacks ***/
   /* Should a local HandleScope be used in those callbacks? */

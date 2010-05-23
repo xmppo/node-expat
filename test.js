@@ -25,7 +25,8 @@ function expect(s, evs_expected) {
     for(var step = s.length; step > 0; step--) {
 	iterations++;
 	var evs_received = [];
-	var p = new expat.Parser();
+	var p = new expat.Parser("ISO-8859-1");
+	p.setEncoding("UTF-8");
 	p.addListener('startElement', function(name, attrs) {
 	    evs_received.push(['startElement', name, attrs]);
 	});
