@@ -88,7 +88,7 @@ protected:
     void *buf = XML_GetBuffer(parser, len);
     assert(buf != NULL);
     assert(str.WriteUtf8(static_cast<char *>(buf), len) == len);
-    assert(XML_ParseBuffer(parser, len, isFinal) != 0);
+    assert(XML_ParseBuffer(parser, len, isFinal) != XML_STATUS_ERROR);
 
     return true;
   }
