@@ -35,8 +35,11 @@ function expect(s, evs_expected) {
 	p.addListener('text', function(s) {
 	    evs_received.push(['text', s]);
 	});
-	p.addListener('cdata', function(s) {
-	    evs_received.push(['cdata', s]);
+	p.addListener('processingInstruction', function(target, data) {
+	    evs_received.push(['processingInstruction', target, data]);
+	});
+	p.addListener('comment', function(s) {
+	    evs_received.push(['comment', s]);
 	});
 	for(var l = 0; l < s.length; l += step)
 	    p.parse(s.substr(l, step), false);
@@ -85,5 +88,9 @@ expect("<r>ß</r>",
        [['startElement', 'r', {}],
 	['text', "ß"],
 	['endElement', 'r']]);
+expect("<?i like xml?>",
+       [['processingInstruction', 'i', 'like xml']]);
+expect("<!-- no comment -->",
+       [['comment', ' no comment ']]);
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");

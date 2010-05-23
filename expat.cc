@@ -7,7 +7,8 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-static Persistent<String> sym_startElement, sym_endElement, sym_text;
+static Persistent<String> sym_startElement, sym_endElement,
+  sym_text, sym_processingInstruction, sym_comment;
 
 class Parser : public EventEmitter {
 public:
@@ -26,6 +27,8 @@ public:
     sym_startElement = NODE_PSYMBOL("startElement");
     sym_endElement = NODE_PSYMBOL("endElement");
     sym_text = NODE_PSYMBOL("text");
+    sym_processingInstruction = NODE_PSYMBOL("processingInstruction");
+    sym_comment = NODE_PSYMBOL("comment");
   }
 
 protected:
@@ -48,6 +51,8 @@ protected:
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, StartElement, EndElement);
     XML_SetCharacterDataHandler(parser, Text);
+    XML_SetProcessingInstructionHandler(parser, ProcessingInstruction);
+    XML_SetCommentHandler(parser, Comment);
   }
 
   ~Parser()
@@ -97,6 +102,7 @@ private:
   XML_Parser parser;
 
   /*** SAX callbacks ***/
+  /* Should a local HandleScope be used in those callbacks? */
 
   static void StartElement(void *userData,
                            const XML_Char *name, const XML_Char **atts)
@@ -131,6 +137,26 @@ private:
     /* Trigger event */
     Handle<Value> argv[1] = { String::New(s, len) };
     parser->Emit(sym_text, 1, argv);
+  }
+
+  static void ProcessingInstruction(void *userData,
+                                    const XML_Char *target, const XML_Char *data)
+  {
+    Parser *parser = reinterpret_cast<Parser *>(userData);
+
+    /* Trigger event */
+    Handle<Value> argv[2] = { String::New(target), String::New(data) };
+    parser->Emit(sym_processingInstruction, 2, argv);
+  }
+
+  static void Comment(void *userData,
+                      const XML_Char *data)
+  {
+    Parser *parser = reinterpret_cast<Parser *>(userData);
+
+    /* Trigger event */
+    Handle<Value> argv[1] = { String::New(data)  };
+    parser->Emit(sym_comment, 1, argv);
   }
 };
 
