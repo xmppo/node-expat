@@ -38,3 +38,7 @@ Use `test.js` for reference.
 A word about special parsing of *xmlns:* this is not neccessary in a
 bare SAX parser like this, given that the DOM replacement you are
 using (if any) is not relevant to the parser.
+
+## TODO ##
+
+* parse() should accept Buffer objects for efficiency
