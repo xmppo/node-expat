@@ -37,14 +37,10 @@ Use `test.js` for reference.
 
 We don't emit an error event because libexpat doesn't use a callback
 either. Instead, check that `parse()` returns `true`. A descriptive
-string can be obtained via `getError()` for user feedback.
+string can be obtained via `getError()` to provide user feedback.
 
 ## Namespace handling ##
 
 A word about special parsing of *xmlns:* this is not neccessary in a
 bare SAX parser like this, given that the DOM replacement you are
 using (if any) is not relevant to the parser.
-
-## TODO ##
-
-* parse() should accept Buffer objects for efficiency
