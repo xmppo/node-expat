@@ -25,13 +25,13 @@ be bullshit, given my few node.js experience.
 For using the library, make sure `build/default/expat.node` is in
 either `$NODE_PATH` or `require.paths`.
 
-So far, three events are emitted by a parser:
+Important events emitted by a parser:
 
 - *startElement* with `name, attrs`
 - *endElement* with `name`
 - *text* with `string`
 
-Use `test.js` for reference.
+There are more. Use `test.js` for reference.
 
 ## Error handling ##
 
