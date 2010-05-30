@@ -244,8 +244,8 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[3] = { String::New(version),
-                              String::New(encoding),
+    Handle<Value> argv[3] = { version ? String::New(version) : Null(),
+                              encoding ? String::New(encoding) : Null(),
                               Boolean::New(standalone) };
     parser->Emit(sym_xmlDecl, 3, argv);
   }

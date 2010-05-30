@@ -102,11 +102,15 @@ expect("<r>ß</r>",
 	['endElement', 'r']]);
 expect("<?i like xml?>",
        [['processingInstruction', 'i', 'like xml']]);
+expect("<?dragons?>",
+       [['processingInstruction', 'dragons', '']]);
 expect("<!-- no comment -->",
        [['comment', ' no comment ']]);
 expect("<&", [['error']]);
 expect("<?xml version='1.0' encoding='UTF-8'?>",
        [['xmlDecl', '1.0', 'UTF-8', true]]);
+expect("<?xml version='1.0'?>",
+       [['xmlDecl', '1.0', null, true]]);
 expect(new Buffer('<foo>bar</foo>'),
        [['startElement', 'foo', {}],
 	['text', 'bar'],
