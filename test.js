@@ -42,6 +42,9 @@ function expect(s, evs_expected) {
 	p.addListener('comment', function(s) {
 	    evs_received.push(['comment', s]);
 	});
+	p.addListener('xmlDecl', function(version, encoding, standalone) {
+	    evs_received.push(['xmlDecl', version, encoding, standalone]);
+	});
 	for(var l = 0; l < s.length; l += step)
 	{
 	    if (!p.parse(s.substr(l, step), false))
@@ -97,5 +100,7 @@ expect("<?i like xml?>",
 expect("<!-- no comment -->",
        [['comment', ' no comment ']]);
 expect("<&", [['error']]);
+expect("<?xml version='1.0' encoding='UTF-8'?>",
+       [['xmlDecl', '1.0', 'UTF-8', true]]);
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");

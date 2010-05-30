@@ -8,7 +8,8 @@ using namespace v8;
 using namespace node;
 
 static Persistent<String> sym_startElement, sym_endElement,
-  sym_text, sym_processingInstruction, sym_comment;
+  sym_text, sym_processingInstruction,
+  sym_comment, sym_xmlDecl;
 
 class Parser : public EventEmitter {
 public:
@@ -30,6 +31,7 @@ public:
     sym_text = NODE_PSYMBOL("text");
     sym_processingInstruction = NODE_PSYMBOL("processingInstruction");
     sym_comment = NODE_PSYMBOL("comment");
+    sym_xmlDecl = NODE_PSYMBOL("xmlDecl");
   }
 
 protected:
@@ -61,6 +63,7 @@ protected:
     XML_SetCharacterDataHandler(parser, Text);
     XML_SetProcessingInstructionHandler(parser, ProcessingInstruction);
     XML_SetCommentHandler(parser, Comment);
+    XML_SetXmlDeclHandler(parser, XmlDecl);
   }
 
   ~Parser()
@@ -188,8 +191,21 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { String::New(data)  };
+    Handle<Value> argv[1] = { String::New(data) };
     parser->Emit(sym_comment, 1, argv);
+  }
+
+  static void XmlDecl(void *userData,
+                      const XML_Char *version, const XML_Char *encoding,
+                      int standalone)
+  {
+    Parser *parser = reinterpret_cast<Parser *>(userData);
+
+    /* Trigger event */
+    Handle<Value> argv[3] = { String::New(version),
+                              String::New(encoding),
+                              Boolean::New(standalone) };
+    parser->Emit(sym_xmlDecl, 3, argv);
   }
 };
 
