@@ -33,6 +33,12 @@ So far, three events are emitted by a parser:
 
 Use `test.js` for reference.
 
+## Error handling ##
+
+We don't emit an error event because libexpat doesn't use a callback
+either. Instead, check that `parse()` returns `true`. A descriptive
+string can be obtained via `getError()` for user feedback.
+
 ## Namespace handling ##
 
 A word about special parsing of *xmlns:* this is not neccessary in a
