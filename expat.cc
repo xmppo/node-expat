@@ -36,6 +36,8 @@ public:
   }
 
 protected:
+  /*** Constructor ***/
+
   static Handle<Value> New(const Arguments& args)
   {
     HandleScope scope;
@@ -72,6 +74,8 @@ protected:
     XML_ParserFree(parser);
   }
 
+  /*** parse() ***/
+
   static Handle<Value> Parse(const Arguments& args)
   {
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
@@ -106,6 +110,8 @@ protected:
     return XML_ParseBuffer(parser, len, isFinal) != 0;
   }
 
+  /*** setEncoding() ***/
+
   static Handle<Value> SetEncoding(const Arguments& args)
   {
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
@@ -130,6 +136,8 @@ protected:
   {
     return XML_SetEncoding(parser, encoding) != 0;
   }
+
+  /*** getError() ***/
 
   static Handle<Value> GetError(const Arguments& args)
   {
