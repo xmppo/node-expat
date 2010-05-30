@@ -98,12 +98,21 @@ protected:
       }
     else if (args.Length() >= 1 && args[0]->IsObject())
       {
-        /* TODO: is it really a buffer? */
-        Buffer *buffer = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
-        return scope.Close(parser->parseBuffer(*buffer, isFinal) ? True() : False());
+        Local<Object> obj = args[0]->ToObject();
+        if (Buffer::HasInstance(obj))
+        {
+          Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+          return scope.Close(parser->parseBuffer(*buffer, isFinal) ? True() : False());
+        }
+        else
+          return ThrowException(
+            Exception::TypeError(
+              String::New("Parse buffer must be String or Buffer")));
       }
     else
-      return scope.Close(False());
+      return ThrowException(
+        Exception::TypeError(
+          String::New("Parse buffer must be String or Buffer")));
   }
 
   /** Parse a v8 String by first writing it to the expat parser's
