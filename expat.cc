@@ -23,6 +23,7 @@ public:
 
     NODE_SET_PROTOTYPE_METHOD(t, "parse", Parse);
     NODE_SET_PROTOTYPE_METHOD(t, "setEncoding", SetEncoding);
+    NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
 
@@ -128,6 +129,21 @@ protected:
   int setEncoding(XML_Char *encoding)
   {
     return XML_SetEncoding(parser, encoding) != 0;
+  }
+
+  static Handle<Value> GetError(const Arguments& args)
+  {
+    HandleScope scope;
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+
+    return scope.Close(String::New(parser->getError()));
+  }
+
+  const XML_LChar *getError()
+  {
+    enum XML_Error code;
+    code = XML_GetErrorCode(parser);
+    return XML_ErrorString(code);
   }
 
 private:
