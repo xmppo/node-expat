@@ -1,5 +1,6 @@
 var sys = require('sys');
 var expat = require('./build/default/expat');
+var Buffer = require('buffer').Buffer;
 
 function collapseTexts(evs) {
     var r = [];
@@ -47,7 +48,11 @@ function expect(s, evs_expected) {
 	});
 	for(var l = 0; l < s.length; l += step)
 	{
-	    if (!p.parse(s.substr(l, step), false))
+	    var end = l + step;
+	    if (end > s.length)
+		end = s.length;
+
+	    if (!p.parse(s.slice(l, end), false))
 		evs_received.push(['error']);
 	}
 
@@ -102,5 +107,9 @@ expect("<!-- no comment -->",
 expect("<&", [['error']]);
 expect("<?xml version='1.0' encoding='UTF-8'?>",
        [['xmlDecl', '1.0', 'UTF-8', true]]);
+expect(new Buffer('<foo>bar</foo>'),
+       [['startElement', 'foo', {}],
+	['text', 'bar'],
+	['endElement', 'foo']]);
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");

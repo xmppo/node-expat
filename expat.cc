@@ -1,5 +1,6 @@
 #include <node.h>
 #include <node_events.h>
+#include <node_buffer.h>
 extern "C" {
 #include <expat.h>
 }
@@ -83,31 +84,44 @@ protected:
     Local<String> str;
     int isFinal = 0;
 
-    /* Argument 1: buf :: String */
-    if (args.Length() >= 1 && args[0]->IsString())
-      {
-        str = args[0]->ToString();
-      }
-    else
-      return scope.Close(False());
-
     /* Argument 2: isFinal :: Bool */
     if (args.Length() >= 2)
       {
         isFinal = args[1]->IsTrue();
       }
 
-    return scope.Close(parser->parse(**str, isFinal) ? True() : False());
+    /* Argument 1: buf :: String or Buffer */
+    if (args.Length() >= 1 && args[0]->IsString())
+      {
+        str = args[0]->ToString();
+        return scope.Close(parser->parseString(**str, isFinal) ? True() : False());
+      }
+    else if (args.Length() >= 1 && args[0]->IsObject())
+      {
+        /* TODO: is it really a buffer? */
+        Buffer *buffer = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
+        return scope.Close(parser->parseBuffer(*buffer, isFinal) ? True() : False());
+      }
+    else
+      return scope.Close(False());
   }
 
-  bool parse(String &str, int isFinal)
+  /** Parse a v8 String by first writing it to the expat parser's
+      buffer */
+  bool parseString(String &str, int isFinal)
   {
     int len = str.Utf8Length();
     void *buf = XML_GetBuffer(parser, len);
     assert(buf != NULL);
     assert(str.WriteUtf8(static_cast<char *>(buf), len) == len);
 
-    return XML_ParseBuffer(parser, len, isFinal) != 0;
+    return XML_ParseBuffer(parser, len, isFinal) != XML_STATUS_ERROR;
+  }
+
+  /** Parse a node.js Buffer directly */
+  bool parseBuffer(Buffer &buffer, int isFinal)
+  {
+    return XML_Parse(parser, buffer.data(), buffer.length(), isFinal) != XML_STATUS_ERROR;
   }
 
   /*** setEncoding() ***/
@@ -144,7 +158,11 @@ protected:
     HandleScope scope;
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
 
-    return scope.Close(String::New(parser->getError()));
+    const XML_LChar *error = parser->getError();
+    if (error)
+      return scope.Close(String::New(error));
+    else
+      return scope.Close(Null());
   }
 
   const XML_LChar *getError()
