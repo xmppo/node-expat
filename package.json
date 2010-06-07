@@ -2,5 +2,6 @@
 ,"version": "1.0.0"
 ,"main": "./build/default"
 ,"description": "CommonJS module for XML parsing."
+,"scripts" : { "install" : "./install.sh" }
 ,"dependencies": []
 }
