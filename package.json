@@ -1,0 +1,6 @@
+{ "name": "node-expat"
+,"version": "1.0.0"
+,"main": "./build/default"
+,"description": "CommonJS module for XML parsing."
+,"dependencies": []
+}
