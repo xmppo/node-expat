@@ -12,6 +12,8 @@ static Persistent<String> sym_startElement, sym_endElement,
   sym_text, sym_processingInstruction,
   sym_comment, sym_xmlDecl;
 
+static const XML_Memory_Handling_Suite *memsuite();
+
 class Parser : public EventEmitter {
 public:
   static void Initialize(Handle<Object> target)
@@ -59,7 +61,7 @@ protected:
   Parser(const XML_Char *encoding)
     : EventEmitter()
   {
-    parser = XML_ParserCreate(encoding);
+    parser = XML_ParserCreate_MM(encoding, memsuite(), NULL);
     assert(parser != NULL);
 
     XML_SetUserData(parser, this);
@@ -266,4 +268,61 @@ extern "C" void init(Handle<Object> target)
 {
   HandleScope scope;
   Parser::Initialize(target);
+}
+
+
+/* libexpat allows us to pass our own allocation functions to
+ * XML_ParserCreate_MM(). This allows us to pass memory usage deltas
+ * to V8::AdjustAmountOfExternalAllocatedMemory(). We only need to
+ * keep track of allocation sizes, which we store 1 size_t ahead of
+ * the data.
+ */
+
+void *memsuite_malloc(size_t size)
+{
+  if (size > 0)
+  {
+    size_t *r = reinterpret_cast<size_t *>(malloc(sizeof(size_t) + size));
+    *r = size;
+    V8::AdjustAmountOfExternalAllocatedMemory(size);
+    return reinterpret_cast<void *>(r + 1);
+  }
+  else
+    return NULL;
+}
+
+void *memsuite_realloc(void *ptr, size_t size)
+{
+  if (ptr)
+  {
+    size_t *r = reinterpret_cast<size_t *>(ptr) - 1;
+    V8::AdjustAmountOfExternalAllocatedMemory(size - *r);
+    size_t *new_r = reinterpret_cast<size_t *>
+      (realloc(reinterpret_cast<void *>(r), sizeof(size_t) + size));
+    return new_r + sizeof(size_t);
+  }
+  else
+  {
+    return memsuite_malloc(size);
+  }
+}
+
+void memsuite_free(void *ptr)
+{
+  if (ptr)
+  {
+    size_t *r = reinterpret_cast<size_t *>(ptr) - 1;
+    V8::AdjustAmountOfExternalAllocatedMemory(-*r);
+    free(reinterpret_cast<void *>(r));
+  }
+}
+
+static const XML_Memory_Handling_Suite *memsuite()
+{
+  static const XML_Memory_Handling_Suite suite = {
+    &memsuite_malloc,
+    &memsuite_realloc,
+    &memsuite_free
+  };
+  return &suite;
 }
