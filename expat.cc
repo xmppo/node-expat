@@ -291,22 +291,6 @@ void *memsuite_malloc(size_t size)
     return NULL;
 }
 
-void *memsuite_realloc(void *ptr, size_t size)
-{
-  if (ptr)
-  {
-    size_t *r = reinterpret_cast<size_t *>(ptr) - 1;
-    V8::AdjustAmountOfExternalAllocatedMemory(size - *r);
-    size_t *new_r = reinterpret_cast<size_t *>
-      (realloc(reinterpret_cast<void *>(r), sizeof(size_t) + size));
-    return new_r + sizeof(size_t);
-  }
-  else
-  {
-    return memsuite_malloc(size);
-  }
-}
-
 void memsuite_free(void *ptr)
 {
   if (ptr)
@@ -314,6 +298,27 @@ void memsuite_free(void *ptr)
     size_t *r = reinterpret_cast<size_t *>(ptr) - 1;
     V8::AdjustAmountOfExternalAllocatedMemory(-*r);
     free(reinterpret_cast<void *>(r));
+  }
+}
+
+void *memsuite_realloc(void *ptr, size_t size)
+{
+  if (ptr && size > 0)
+  {
+    size_t *r = reinterpret_cast<size_t *>(ptr) - 1;
+    V8::AdjustAmountOfExternalAllocatedMemory(size - *r);
+    size_t *new_r = reinterpret_cast<size_t *>
+      (realloc(reinterpret_cast<void *>(r), sizeof(size_t) + size));
+    return new_r + sizeof(size_t);
+  }
+  else if (ptr) /* size <= 0 */
+  {
+    memsuite_free(ptr);
+    return NULL;
+  }
+  else
+  {
+    return memsuite_malloc(size);
   }
 }
 
