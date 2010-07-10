@@ -1,5 +1,5 @@
 { "name": "node-expat"
-,"version": "0.0.5"
+,"version": "0.0.6"
 ,"main": "./build/default"
 ,"description": "libexpat XML SAX parser binding for node.js"
 ,"scripts" : { "install" : "./install.sh" }
