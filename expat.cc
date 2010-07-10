@@ -309,7 +309,8 @@ void *memsuite_realloc(void *ptr, size_t size)
     V8::AdjustAmountOfExternalAllocatedMemory(size - *r);
     size_t *new_r = reinterpret_cast<size_t *>
       (realloc(reinterpret_cast<void *>(r), sizeof(size_t) + size));
-    return new_r + sizeof(size_t);
+    *new_r = size;
+    return reinterpret_cast<void *>(new_r + 1);
   }
   else if (ptr) /* size <= 0 */
   {
