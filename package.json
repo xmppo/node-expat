@@ -1,7 +1,7 @@
 { "name": "node-expat"
-,"version": "0.0.4"
+,"version": "1.0.0"
 ,"main": "./build/default"
-,"description": "CommonJS module for XML parsing."
+,"description": "NodeJS binding for fast XML parsing."
 ,"scripts" : { "install" : "./install.sh" }
 ,"dependencies": []
 }
