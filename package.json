@@ -4,4 +4,15 @@
 ,"description": "NodeJS binding for fast XML parsing."
 ,"scripts" : { "install" : "./install.sh" }
 ,"dependencies": []
+,"repositories": [{ "type": "git"
+		   ,"path": "git://github.com/astro/node-expat.git"
+		  }]
+,"homepage": "http://github.com/astro/node-expat"
+,"bugs": "http://github.com/astro/node-expat/issues"
+,"maintainers": [{ "name": "Astro"
+		  ,"email": "astro@spaceboyz.net"
+		  ,"web": "http://spaceboyz.net/~astro/"
+		 }]
+,"licenses": [{ "type": "MIT" }]
+,"engine": "node"
 }
