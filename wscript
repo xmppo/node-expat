@@ -11,6 +11,6 @@ def configure(conf):
 
 def build(bld):
   obj = bld.new_task_gen('cxx', 'shlib', 'node_addon')
-  obj.target = 'expat'
-  obj.source = 'expat.cc'
+  obj.target = 'node-expat'
+  obj.source = 'node-expat.cc'
   obj.lib = 'expat'

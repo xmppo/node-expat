@@ -1,6 +1,6 @@
 { "name": "node-expat"
 ,"version": "1.0.1"
-,"main": "./build/default/expat"
+,"main": "./build/default/node-expat"
 ,"description": "NodeJS binding for fast XML parsing."
 ,"scripts" : { "install" : "./install.sh" }
 ,"dependencies": []

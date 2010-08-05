@@ -1,5 +1,5 @@
 var sys = require('sys');
-var expat = require('./build/default/expat');
+var expat = require('./build/default/node-expat');
 var Buffer = require('buffer').Buffer;
 
 function collapseTexts(evs) {

@@ -1,7 +1,7 @@
 var sys = require('sys');
 var node_xml = require("node-xml");
 var libxml = require("libxmljs");
-var expat = require('./build/default/expat');
+var expat = require('./build/default/node-expat');
 
 function NodeXmlParser() {
     var parser = new node_xml.SaxParser(function(cb) { });
