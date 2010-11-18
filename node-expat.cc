@@ -1,4 +1,5 @@
 #include <node.h>
+#include <node_version.h>
 #include <node_events.h>
 #include <node_buffer.h>
 extern "C" {
@@ -101,8 +102,12 @@ protected:
         Local<Object> obj = args[0]->ToObject();
         if (Buffer::HasInstance(obj))
         {
+#if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
           Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
           return scope.Close(parser->parseBuffer(*buffer, isFinal) ? True() : False());
+#else
+          return scope.Close(parser->parseBuffer(obj, isFinal) ? True() : False());
+#endif
         }
         else
           return ThrowException(
@@ -128,10 +133,17 @@ protected:
   }
 
   /** Parse a node.js Buffer directly */
+#if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
   bool parseBuffer(Buffer &buffer, int isFinal)
   {
     return XML_Parse(parser, buffer.data(), buffer.length(), isFinal) != XML_STATUS_ERROR;
   }
+#else
+  bool parseBuffer(Local<Object> buffer, int isFinal)
+  {
+    return XML_Parse(parser, Buffer::Data(buffer), Buffer::Length(buffer), isFinal) != XML_STATUS_ERROR;
+  }
+#endif
 
   /*** setEncoding() ***/
 
