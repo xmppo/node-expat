@@ -46,6 +46,12 @@ function expect(s, evs_expected) {
 	p.addListener('xmlDecl', function(version, encoding, standalone) {
 	    evs_received.push(['xmlDecl', version, encoding, standalone]);
 	});
+	p.addListener('startCdata', function() {
+	    evs_received.push(['startCdata']);
+	});
+	p.addListener('endCdata', function() {
+	    evs_received.push(['endCdata']);
+	});
 	for(var l = 0; l < s.length; l += step)
 	{
 	    var end = l + step;
@@ -90,7 +96,9 @@ expect("<r>foo\nbar</r>",
 	['endElement', 'r']]);
 expect("<r><![CDATA[<greeting>Hello, world!</greeting>]]></r>",
        [['startElement', 'r', {}],
+	['startCdata'],
 	['text', "<greeting>Hello, world!</greeting>"],
+	['endCdata'],
 	['endElement', 'r']]);
 expect("<r>foo&amp;bar</r>",
        [['startElement', 'r', {}],
@@ -114,6 +122,12 @@ expect("<?xml version='1.0'?>",
 expect(new Buffer('<foo>bar</foo>'),
        [['startElement', 'foo', {}],
 	['text', 'bar'],
+	['endElement', 'foo']]);
+expect(new Buffer('<foo><![CDATA[bar]]></foo>'),
+       [['startElement', 'foo', {}],
+	['startCdata'],
+	['text', 'bar'],
+	['endCdata'],
 	['endElement', 'foo']]);
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");
