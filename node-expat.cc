@@ -10,7 +10,7 @@ using namespace v8;
 using namespace node;
 
 static Persistent<String> sym_startElement, sym_endElement,
-  sym_startCdataElement, sym_endCdataElement,
+  sym_startCdata, sym_endCdata,
   sym_text, sym_processingInstruction,
   sym_comment, sym_xmlDecl;
 
@@ -32,8 +32,8 @@ public:
 
     sym_startElement = NODE_PSYMBOL("startElement");
     sym_endElement = NODE_PSYMBOL("endElement");
-    sym_startCdataElement = NODE_PSYMBOL("startCdataElement");
-    sym_endCdataElement = NODE_PSYMBOL("endCdataElement");
+    sym_startCdata = NODE_PSYMBOL("startCdata");
+    sym_endCdata = NODE_PSYMBOL("endCdata");
     sym_text = NODE_PSYMBOL("text");
     sym_processingInstruction = NODE_PSYMBOL("processingInstruction");
     sym_comment = NODE_PSYMBOL("comment");
@@ -69,7 +69,7 @@ protected:
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, StartElement, EndElement);
     XML_SetCharacterDataHandler(parser, Text);
-    XML_SetCdataSectionHandler(parser, StartCdataElement, EndCdataElement);
+    XML_SetCdataSectionHandler(parser, StartCdata, EndCdata);
     XML_SetProcessingInstructionHandler(parser, ProcessingInstruction);
     XML_SetCommentHandler(parser, Comment);
     XML_SetXmlDeclHandler(parser, XmlDecl);
@@ -232,22 +232,22 @@ private:
     parser->Emit(sym_endElement, 1, argv);
   }
   
-  static void StartCdataElement(void *userData)
+  static void StartCdata(void *userData)
   {
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
     Handle<Value> argv[0] = {};
-    parser->Emit(sym_startCdataElement, 0, argv);
+    parser->Emit(sym_startCdata, 0, argv);
   }
 
-  static void EndCdataElement(void *userData)
+  static void EndCdata(void *userData)
   {
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
     Handle<Value> argv[0] = {};
-    parser->Emit(sym_endCdataElement, 0, argv);
+    parser->Emit(sym_endCdata, 0, argv);
   }
 
   static void Text(void *userData,
