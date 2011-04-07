@@ -1,17 +1,19 @@
 { "name": "node-expat"
-,"version": "1.2.0"
+,"version": "1.3.0"
 ,"main": "./build/default/node-expat"
 ,"description": "NodeJS binding for fast XML parsing."
 ,"scripts" : { "install" : "./install.sh" }
 ,"dependencies": []
 ,"repositories": [{ "type": "git"
-		   ,"path": "git://github.com/astro/node-expat.git"
+		   ,"path": "git://github.com/MaZderMind/node-expat.git"
 		  }]
-,"homepage": "http://github.com/astro/node-expat"
-,"bugs": "http://github.com/astro/node-expat/issues"
+,"homepage": "http://github.com/MaZderMind/node-expat"
+,"bugs": "http://github.com/MaZderMind/node-expat/issues"
 ,"maintainers": [{ "name": "Astro"
 		  ,"email": "astro@spaceboyz.net"
 		  ,"web": "http://spaceboyz.net/~astro/"
+		 }, { "name": "MaZderMind"
+		  ,"email": "peter@mazdermind.de"
 		 }]
 ,"licenses": [{ "type": "MIT" }]
 ,"engine": "node"
