@@ -74,6 +74,81 @@ function expect(s, evs_expected) {
     }
 }
 
+function testStopResume(cb)
+{
+	var p = new expat.Parser("UTF-8");
+	
+	var input = '\
+		<wrap> \
+			<short /> \
+			<short></short> \
+			<long /> \
+			<short /> \
+			<long>foo</long> \
+		</wrap>';
+	
+	var expected = ['wrap', 'short', 'short', 'long', 'short', 'long'];
+	var received = [];
+	
+	var tolerance = 10/100;
+	var expectedRuntime = 1000;
+	var start = new Date();
+	
+	p.addListener('startElement', function(name, attrs) {
+		received.push(name);
+		
+		// suspend parser for 1/2 second
+		if(name == 'long') {
+			p.stop();
+			
+			setTimeout(function() {
+				p.resume();
+			}, 500);
+		}
+	})
+	
+	p.addListener('endElement', function(name) {
+		// finished parsing
+		if(name == 'wrap') {
+			// test elements received (count. naming, order)
+			if(JSON.stringify(expected) != JSON.stringify(received)) {
+				sys.puts("Failed Stop/Resume test");
+				sys.puts("Expected: " + expected);
+				sys.puts("Received: " + received);
+				return cb(false);
+			}
+			
+			// test timing (+-5%)
+			var now = new Date();
+			var diff = now.getTime() - start.getTime();
+			var max = expectedRuntime + expectedRuntime * tolerance, 
+				min = expectedRuntime - expectedRuntime * tolerance;
+			
+			if(diff > max) {
+				sys.puts("Failed Stop/Resume test");
+				sys.puts("Expected Runtime < " + max);
+				sys.puts("Taken Runtime: " + diff);
+				return cb(false);
+			}
+			
+			if(diff < min) {
+				sys.puts("Failed Stop/Resume test");
+				sys.puts("Expected Runtime > " + min);
+				sys.puts("Taken Runtime: " + diff);
+				return cb(false);
+			}
+			
+			sys.puts("Completed Stop/Resume test");
+			return cb(true);
+		}
+	});
+	
+	if(!p.parse(input)) {
+		sys.puts("Failed Stop/Resume test: parse returned error: "+p.getError());
+		return cb(false);
+	}
+}
+
 expect("<r/>",
        [['startElement', 'r', {}],
 	['endElement', 'r']]);
@@ -131,3 +206,9 @@ expect(new Buffer('<foo><![CDATA[bar]]></foo>'),
 	['endElement', 'foo']]);
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");
+
+sys.puts("Starting async StartStop (wait for result...)");
+testStopResume(function(success) {
+	sys.puts("StartStop Test "+(success ? 'succeeded' : 'failed'));
+});
+
