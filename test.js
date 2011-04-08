@@ -138,7 +138,6 @@ function testStopResume(cb)
 				return cb(false);
 			}
 			
-			sys.puts("Completed Stop/Resume test");
 			return cb(true);
 		}
 	});
@@ -207,8 +206,8 @@ expect(new Buffer('<foo><![CDATA[bar]]></foo>'),
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");
 
-sys.puts("Starting async StartStop (wait for result...)");
+sys.puts("Starting Stop/Resume Test (wait for result...)");
 testStopResume(function(success) {
-	sys.puts("StartStop Test "+(success ? 'succeeded' : 'failed'));
+	sys.puts("Stop/Resume Test "+(success ? 'succeeded' : 'failed'));
 });
 
