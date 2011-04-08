@@ -13,7 +13,7 @@
 		  ,"email": "astro@spaceboyz.net"
 		  ,"web": "http://spaceboyz.net/~astro/"
 		 }]
-,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez"]
+,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner"]
 ,"licenses": [{ "type": "MIT" }]
 ,"engine": "node"
 }

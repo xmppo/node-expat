@@ -33,6 +33,9 @@ Important events emitted by a parser:
 
 There are more. Use `test.js` for reference.
 
+It's possible to stop and resume the parser from within element handlers using the parsers 
+stop() and resume() methods.
+
 ## Error handling ##
 
 We don't emit an error event because libexpat doesn't use a callback

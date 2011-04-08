@@ -27,6 +27,8 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "parse", Parse);
     NODE_SET_PROTOTYPE_METHOD(t, "setEncoding", SetEncoding);
     NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
+    NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
+    NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
 
@@ -189,7 +191,41 @@ protected:
     else
       return scope.Close(Null());
   }
+  
+  /*** stop() ***/
 
+  static Handle<Value> Stop(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    int status = parser->stop();
+    
+    return scope.Close(status ? True() : False());
+  }
+
+  int stop()
+  {
+    return XML_StopParser(parser, XML_TRUE) != 0;
+  }
+  
+  /*** resume() ***/
+
+  static Handle<Value> Resume(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    int status = parser->resume();
+    
+    return scope.Close(status ? True() : False());
+  }
+
+  int resume()
+  {
+    return XML_ResumeParser(parser) != 0;
+  }
+  
   const XML_LChar *getError()
   {
     enum XML_Error code;
