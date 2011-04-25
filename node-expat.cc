@@ -2,17 +2,22 @@
 #include <node_version.h>
 #include <node_events.h>
 #include <node_buffer.h>
+#include <string>
 extern "C" {
 #include <expat.h>
 }
 
+using namespace std;
 using namespace v8;
 using namespace node;
 
 static Persistent<String> sym_startElement, sym_endElement,
   sym_startCdata, sym_endCdata,
   sym_text, sym_processingInstruction,
-  sym_comment, sym_xmlDecl;
+  sym_comment, sym_xmlDecl, sym_done;
+
+static int firstElementCount;
+static string firstElementName;
 
 class Parser : public EventEmitter {
 public:
@@ -40,6 +45,7 @@ public:
     sym_processingInstruction = NODE_PSYMBOL("processingInstruction");
     sym_comment = NODE_PSYMBOL("comment");
     sym_xmlDecl = NODE_PSYMBOL("xmlDecl");
+    sym_done = NODE_PSYMBOL("done");
   }
 
 protected:
@@ -246,6 +252,18 @@ private:
   static void StartElement(void *userData,
                            const XML_Char *name, const XML_Char **atts)
   {
+    /* START */
+    /* Trying to determine when the entire stream has finished parsing */
+    string strName(name);
+    if(firstElementCount == 0)
+    {
+      firstElementName = strName;
+      firstElementCount++;
+    }
+    else if(strName.compare(firstElementName) == 0)
+      firstElementCount++;
+    /* END */
+
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Collect atts into JS object */
@@ -266,6 +284,17 @@ private:
     /* Trigger event */
     Handle<Value> argv[1] = { String::New(name) };
     parser->Emit(sym_endElement, 1, argv);
+
+    /* START */
+    /* Trying to determine when the entire stream has finished parsing */
+    string strName(name);
+    if(strName.compare(firstElementName) == 0)
+    {
+      firstElementCount--;
+      if(firstElementCount <=0)
+        parser->Emit(sym_done, 0, NULL);
+    }
+    /* END */
   }
   
   static void StartCdata(void *userData)
