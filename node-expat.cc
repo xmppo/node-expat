@@ -12,7 +12,8 @@ using namespace node;
 static Persistent<String> sym_startElement, sym_endElement,
   sym_startCdata, sym_endCdata,
   sym_text, sym_processingInstruction,
-  sym_comment, sym_xmlDecl, sym_entityDecl;
+  sym_comment, sym_xmlDecl, sym_entityDecl,
+  sym_drain;
 
 class Parser : public EventEmitter {
 public:
@@ -42,6 +43,7 @@ public:
     sym_comment = NODE_PSYMBOL("comment");
     sym_xmlDecl = NODE_PSYMBOL("xmlDecl");
     sym_entityDecl = NODE_PSYMBOL("entityDecl");
+    sym_drain = NODE_PSYMBOL("drain");
   }
 
 protected:
@@ -145,12 +147,16 @@ protected:
 #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
   bool parseBuffer(Buffer &buffer, int isFinal)
   {
-    return XML_Parse(parser, buffer.data(), buffer.length(), isFinal) != XML_STATUS_ERROR;
+    bool status = XML_Parse(parser, buffer.data(), buffer.length(), isFinal) != XML_STATUS_ERROR;
+    mayDrain();
+    return status;
   }
 #else
   bool parseBuffer(Local<Object> buffer, int isFinal)
   {
-    return XML_Parse(parser, Buffer::Data(buffer), Buffer::Length(buffer), isFinal) != XML_STATUS_ERROR;
+    bool status = XML_Parse(parser, Buffer::Data(buffer), Buffer::Length(buffer), isFinal) != XML_STATUS_ERROR;
+    mayDrain();
+    return status;
   }
 #endif
 
@@ -209,7 +215,10 @@ protected:
 
   int stop()
   {
-    return XML_StopParser(parser, XML_TRUE) != 0;
+    int status = XML_StopParser(parser, XML_TRUE);
+    mayDrain();
+
+    return status != 0;
   }
   
   /*** resume() ***/
@@ -226,7 +235,10 @@ protected:
 
   int resume()
   {
-    return XML_ResumeParser(parser) != 0;
+    int status = XML_ResumeParser(parser);
+    mayDrain();
+
+    return status;
   }
   
   const XML_LChar *getError()
@@ -234,6 +246,19 @@ protected:
     enum XML_Error code;
     code = XML_GetErrorCode(parser);
     return XML_ErrorString(code);
+  }
+
+  /**
+   * Emits the 'drain' event
+   */
+  void mayDrain()
+  {
+    XML_ParsingStatus status;
+    XML_GetParsingStatus(parser, &status);
+
+    printf("parsing status: %X, final: %X\n", status.parsing, status.finalBuffer);
+    if (status.parsing == XML_PARSING)
+        Emit(sym_drain, 0, NULL);
   }
 
 private:

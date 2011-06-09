@@ -55,6 +55,7 @@ function expect(s, evs_expected) {
 	p.addListener('entityDecl', function(entityName, isParameterEntity, value, base, systemId, publicId, notationName) {
 	    evs_received.push(['entityDecl', entityName, isParameterEntity, value, base, systemId, publicId, notationName]);
 	});
+p.on('drain',function(){console.log('drain');});
 	for(var l = 0; l < s.length; l += step)
 	{
 	    var end = l + step;
