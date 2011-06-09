@@ -28,6 +28,7 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "setEncoding", SetEncoding);
     NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
     NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
+    NODE_SET_PROTOTYPE_METHOD(t, "pause", Stop);  // Alias for node stream conventions
     NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
