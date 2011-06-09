@@ -52,6 +52,9 @@ function expect(s, evs_expected) {
 	p.addListener('endCdata', function() {
 	    evs_received.push(['endCdata']);
 	});
+	p.addListener('entityDecl', function(entityName, isParameterEntity, value, base, systemId, publicId, notationName) {
+	    evs_received.push(['entityDecl', entityName, isParameterEntity, value, base, systemId, publicId, notationName]);
+	});
 	for(var l = 0; l < s.length; l += step)
 	{
 	    var end = l + step;
@@ -203,6 +206,13 @@ expect(new Buffer('<foo><![CDATA[bar]]></foo>'),
 	['text', 'bar'],
 	['endCdata'],
 	['endElement', 'foo']]);
+expect('<!DOCTYPE b [<!ELEMENT b (#PCDATA)>' +
+       '<!ENTITY l0 "ha"><!ENTITY l1 "&l0;&l0;"><!ENTITY l2 "&l1;&l1;">' +
+       ']><b>&l2;</b>',
+       [["entityDecl","l0",false,"ha",null,null,null,null],
+	["entityDecl","l1",false,"&l0;&l0;",null,null,null,null],
+	["entityDecl","l2",false,"&l1;&l1;",null,null,null,null],
+	["startElement","b",{}],["text","hahahaha"],["endElement","b"]]);
 
 sys.puts("Ran "+tests+" tests with "+iterations+" iterations: "+fails+" failures.");
 

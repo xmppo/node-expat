@@ -12,7 +12,7 @@ using namespace node;
 static Persistent<String> sym_startElement, sym_endElement,
   sym_startCdata, sym_endCdata,
   sym_text, sym_processingInstruction,
-  sym_comment, sym_xmlDecl;
+  sym_comment, sym_xmlDecl, sym_entityDecl;
 
 class Parser : public EventEmitter {
 public:
@@ -40,6 +40,7 @@ public:
     sym_processingInstruction = NODE_PSYMBOL("processingInstruction");
     sym_comment = NODE_PSYMBOL("comment");
     sym_xmlDecl = NODE_PSYMBOL("xmlDecl");
+    sym_entityDecl = NODE_PSYMBOL("entityDecl");
   }
 
 protected:
@@ -75,6 +76,7 @@ protected:
     XML_SetProcessingInstructionHandler(parser, ProcessingInstruction);
     XML_SetCommentHandler(parser, Comment);
     XML_SetXmlDeclHandler(parser, XmlDecl);
+    XML_SetEntityDeclHandler(parser, EntityDecl);
   }
 
   ~Parser()
@@ -327,6 +329,24 @@ private:
                               encoding ? String::New(encoding) : Null(),
                               Boolean::New(standalone) };
     parser->Emit(sym_xmlDecl, 3, argv);
+  }
+
+  static void EntityDecl(void *userData, const XML_Char *entityName, int is_parameter_entity,
+                         const XML_Char *value, int value_length, const XML_Char *base,
+                         const XML_Char *systemId, const XML_Char *publicId, const XML_Char *notationName)
+  {
+    Parser *parser = reinterpret_cast<Parser *>(userData);
+
+    /* Trigger event */
+    Handle<Value> argv[7] = { entityName ? String::New(entityName) : Null(),
+                              Boolean::New(is_parameter_entity),
+                              value ? String::New(value) : Null(),
+                              base ? String::New(base) : Null(),
+                              systemId ? String::New(systemId) : Null(),
+                              publicId ? String::New(publicId) : Null(),
+                              notationName ? String::New(notationName) : Null(),
+    };
+    parser->Emit(sym_entityDecl, 7, argv);
   }
 };
 
