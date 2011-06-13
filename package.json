@@ -2,7 +2,10 @@
 ,"version": "1.3.1"
 ,"main": "./build/default/node-expat"
 ,"description": "NodeJS binding for fast XML parsing."
-,"scripts" : { "install" : "./install.sh" }
+,"scripts" : { "install": "node-waf configure build"
+	      ,"update": "node-waf build"
+	      ,"test": "node test.js"
+	     }
 ,"dependencies": []
 ,"repositories": [{ "type": "git"
 		   ,"path": "git://github.com/astro/node-expat.git"
