@@ -209,12 +209,7 @@ vows.describe('node-expat').addBatch({
 		// finished parsing
 		if(name == 'wrap') {
 		    // test elements received (count. naming, order)
-		    if(JSON.stringify(expected) != JSON.stringify(received)) {
-			sys.puts("Failed Stop/Resume test");
-			sys.puts("Expected: " + expected);
-			sys.puts("Received: " + received);
-			return cb(false);
-		    }
+		    assert.equal(JSON.stringify(received), JSON.stringify(expected));
 
 		    // test timing (+-5%)
 		    var now = new Date();
@@ -222,25 +217,17 @@ vows.describe('node-expat').addBatch({
 		    var max = expectedRuntime + expectedRuntime * tolerance,
 			min = expectedRuntime - expectedRuntime * tolerance;
 
-		    if(diff > max) {
-			sys.puts("Failed Stop/Resume test");
-			sys.puts("Expected Runtime < " + max);
-			sys.puts("Taken Runtime: " + diff);
-			return cb(false);
-		    }
-
-		    if(diff < min) {
-			sys.puts("Failed Stop/Resume test");
-			sys.puts("Expected Runtime > " + min);
-			sys.puts("Taken Runtime: " + diff);
-			return cb(false);
-		    }
+		    assert.ok(diff < max, 'Runtime within maximum expected time');
+		    assert.ok(diff > min, 'Runtime at least minimum expected time');
 
 		    return cb(true);
 		}
 	    });
 
 	    assert.ok(p.parse(input));
+	},
+	'should have worked': function() {
+	    assert.ok(true, 'start & stop works');
 	}
     },
     'corner cases': {
