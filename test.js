@@ -107,7 +107,9 @@ vows.describe('node-expat').addBatch({
 	'single element with CDATA content': function() {
 	    expect("<r><![CDATA[<greeting>Hello, world!</greeting>]]></r>",
 		[['startElement', 'r', {}],
+		['startCdata'],
 		['text', "<greeting>Hello, world!</greeting>"],
+		['endCdata'],
 		['endElement', 'r']]);
 	},
 	'single element with entity text': function() {
@@ -127,6 +129,17 @@ vows.describe('node-expat').addBatch({
 		[['startElement', 'foo', {}],
 		['text', 'bar'],
 		['endElement', 'foo']]);
+	}
+    },
+    'entity declaration': {
+	'a billion laughs': function() {
+	    expect('<!DOCTYPE b [<!ELEMENT b (#PCDATA)>' +
+		   '<!ENTITY l0 "ha"><!ENTITY l1 "&l0;&l0;"><!ENTITY l2 "&l1;&l1;">' +
+		   ']><b>&l2;</b>',
+		   [["entityDecl","l0",false,"ha",null,null,null,null],
+		   ["entityDecl","l1",false,"&l0;&l0;",null,null,null,null],
+		   ["entityDecl","l2",false,"&l1;&l1;",null,null,null,null],
+		   ["startElement","b",{}],["text","hahahaha"],["endElement","b"]]);
 	}
     },
     'processing instruction': {
