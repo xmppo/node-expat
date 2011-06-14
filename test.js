@@ -229,5 +229,12 @@ vows.describe('node-expat').addBatch({
 
 	    assert.ok(p.parse(input));
 	}
+    },
+    'corner cases': {
+	'parse empty string': function() {
+	    var p = new expat.Parser("UTF-8");
+	    p.parse('');
+	    assert.ok(true, "Did not segfault");
+	}
     }
 }).run();

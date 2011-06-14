@@ -134,6 +134,9 @@ protected:
   bool parseString(String &str, int isFinal)
   {
     int len = str.Utf8Length();
+    if (len == 0)
+      return true;
+
     void *buf = XML_GetBuffer(parser, len);
     assert(buf != NULL);
     assert(str.WriteUtf8(static_cast<char *>(buf), len) == len);
