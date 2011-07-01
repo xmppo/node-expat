@@ -242,8 +242,12 @@ vows.describe('node-expat').addBatch({
            var xml = "<foo>bar</foo>";
            var result = p.parse(xml);
            assert.ok(result);
+           assert.isNull(p.getError());
+
            var result2 = p.parse(xml);
+           assert.isNull(p.getError());
            assert.ok(result2);
+            
         }
     }
 }).run();
