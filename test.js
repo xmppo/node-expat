@@ -235,6 +235,19 @@ vows.describe('node-expat').addBatch({
 	    var p = new expat.Parser("UTF-8");
 	    p.parse('');
 	    assert.ok(true, "Did not segfault");
-	}
+	}, 
+ 	
+	'parsing twice the same document with the same parser instance should be fine': function() {
+	   var p = new expat.Parser("UTF-8");
+           var xml = "<foo>bar</foo>";
+           var result = p.parse(xml);
+           assert.ok(result);
+           assert.isNull(p.getError());
+
+           var result2 = p.parse(xml);
+           assert.isNull(p.getError());
+           assert.ok(result2);
+            
+        }
     }
 }).run();
