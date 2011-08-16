@@ -1,6 +1,6 @@
 { "name": "node-expat"
 ,"version": "1.3.2"
-,"main": "./build/default/node-expat"
+,"main": "./lib/node-expat"
 ,"description": "NodeJS binding for fast XML parsing."
 ,"scripts" : { "install": "node-waf configure build"
 	      ,"update": "node-waf build"

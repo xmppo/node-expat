@@ -1,6 +1,6 @@
 #include <node.h>
 #include <node_version.h>
-#include <node_events.h>
+#include <node_object_wrap.h>
 #include <node_buffer.h>
 extern "C" {
 #include <expat.h>
@@ -12,23 +12,22 @@ using namespace node;
 static Persistent<String> sym_startElement, sym_endElement,
   sym_startCdata, sym_endCdata,
   sym_text, sym_processingInstruction,
-  sym_comment, sym_xmlDecl, sym_entityDecl;
+  sym_comment, sym_xmlDecl, sym_entityDecl,
+  sym_emit;
 
-class Parser : public EventEmitter {
+class Parser : public ObjectWrap {
 public:
   static void Initialize(Handle<Object> target)
   {
     HandleScope scope;
     Local<FunctionTemplate> t = FunctionTemplate::New(New);
 
-    t->Inherit(EventEmitter::constructor_template);
     t->InstanceTemplate()->SetInternalFieldCount(1);
 
     NODE_SET_PROTOTYPE_METHOD(t, "parse", Parse);
     NODE_SET_PROTOTYPE_METHOD(t, "setEncoding", SetEncoding);
     NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
     NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
-    NODE_SET_PROTOTYPE_METHOD(t, "pause", Stop);  // Alias for node stream conventions
     NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
@@ -42,6 +41,7 @@ public:
     sym_comment = NODE_PSYMBOL("comment");
     sym_xmlDecl = NODE_PSYMBOL("xmlDecl");
     sym_entityDecl = NODE_PSYMBOL("entityDecl");
+    sym_emit = NODE_PSYMBOL("emit");
   }
 
 protected:
@@ -65,7 +65,7 @@ protected:
   }
 
   Parser(const XML_Char *encoding)
-    : EventEmitter()
+    : ObjectWrap()
   {
     parser = XML_ParserCreate(encoding);
     assert(parser != NULL);
@@ -260,8 +260,10 @@ private:
       attr->Set(String::New(atts1[0]), String::New(atts1[1]));
 
     /* Trigger event */
-    Handle<Value> argv[2] = { String::New(name), attr };
-    parser->Emit(sym_startElement, 2, argv);
+    Handle<Value> argv[3] = { sym_startElement,
+                              String::New(name),
+                              attr };
+    parser->Emit(3, argv);
   }
 
   static void EndElement(void *userData,
@@ -270,8 +272,8 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { String::New(name) };
-    parser->Emit(sym_endElement, 1, argv);
+    Handle<Value> argv[2] = { sym_endElement, String::New(name) };
+    parser->Emit(2, argv);
   }
   
   static void StartCdata(void *userData)
@@ -279,8 +281,8 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[0] = {};
-    parser->Emit(sym_startCdata, 0, argv);
+    Handle<Value> argv[1] = { sym_startCdata };
+    parser->Emit(1, argv);
   }
 
   static void EndCdata(void *userData)
@@ -288,8 +290,8 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[0] = {};
-    parser->Emit(sym_endCdata, 0, argv);
+    Handle<Value> argv[1] = { sym_endCdata };
+    parser->Emit(1, argv);
   }
 
   static void Text(void *userData,
@@ -298,8 +300,9 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { String::New(s, len) };
-    parser->Emit(sym_text, 1, argv);
+    Handle<Value> argv[2] = { sym_text,
+                              String::New(s, len) };
+    parser->Emit(2, argv);
   }
 
   static void ProcessingInstruction(void *userData,
@@ -308,8 +311,10 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { String::New(target), String::New(data) };
-    parser->Emit(sym_processingInstruction, 2, argv);
+    Handle<Value> argv[3] = { sym_processingInstruction,
+                              String::New(target),
+                              String::New(data) };
+    parser->Emit(3, argv);
   }
 
   static void Comment(void *userData,
@@ -318,8 +323,8 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { String::New(data) };
-    parser->Emit(sym_comment, 1, argv);
+    Handle<Value> argv[2] = { sym_comment, String::New(data) };
+    parser->Emit(2, argv);
   }
 
   static void XmlDecl(void *userData,
@@ -329,10 +334,11 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[3] = { version ? String::New(version) : Null(),
+    Handle<Value> argv[4] = { sym_xmlDecl,
+                              version ? String::New(version) : Null(),
                               encoding ? String::New(encoding) : Null(),
                               Boolean::New(standalone) };
-    parser->Emit(sym_xmlDecl, 3, argv);
+    parser->Emit(4, argv);
   }
 
   static void EntityDecl(void *userData, const XML_Char *entityName, int is_parameter_entity,
@@ -342,7 +348,8 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[7] = { entityName ? String::New(entityName) : Null(),
+    Handle<Value> argv[8] = { sym_entityDecl,
+                              entityName ? String::New(entityName) : Null(),
                               Boolean::New(is_parameter_entity),
                               value ? String::New(value) : Null(),
                               base ? String::New(base) : Null(),
@@ -350,7 +357,15 @@ private:
                               publicId ? String::New(publicId) : Null(),
                               notationName ? String::New(notationName) : Null(),
     };
-    parser->Emit(sym_entityDecl, 7, argv);
+    parser->Emit(8, argv);
+  }
+
+  void Emit(int argc, Handle<Value> argv[])
+  {
+    HandleScope scope;
+
+    Local<Function> emit = Local<Function>::Cast(handle_->Get(sym_emit));
+    emit->Call(handle_, argc, argv);
   }
 };
 

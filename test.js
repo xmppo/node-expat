@@ -1,5 +1,5 @@
 var sys = require('sys');
-var expat = require('./build/default/node-expat');
+var expat = require('./lib/node-expat');
 var Buffer = require('buffer').Buffer;
 var vows = require('vows');
 var assert = require('assert');
