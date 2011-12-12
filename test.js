@@ -248,7 +248,7 @@ vows.describe('node-expat').addBatch({
            var result2 = p.parse(xml);
            assert.isNull(p.getError());
            assert.ok(result2);
-            
+
         }*/
     }
-}).run();
+}).export(module);

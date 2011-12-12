@@ -7,7 +7,7 @@
 	      ,"test": "node test.js"
 	     }
 ,"dependencies": []
-,"devDependencies": ["vows"]
+,"devDependencies": {"vows": ">=0.5.12"}
 ,"repositories": [{ "type": "git"
 		   ,"path": "git://github.com/astro/node-expat.git"
 		  }]
@@ -20,4 +20,5 @@
 ,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel"]
 ,"licenses": [{ "type": "MIT" }]
 ,"engine": "node"
+,"scripts": {"test":"vows --spec ./test.js"}
 }
