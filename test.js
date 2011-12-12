@@ -1,4 +1,3 @@
-var sys = require('sys');
 var expat = require('./lib/node-expat');
 var Buffer = require('buffer').Buffer;
 var vows = require('vows');
