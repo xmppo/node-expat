@@ -50,7 +50,7 @@ goto exit
 echo GYP was not found. Please check that gyp is located in %NODE_ROOT%/tools/gyp/ 
 goto exit
 :nodebuild-not-found
-echo Node build path not found! Please check the NODE_ROOT environment variable exists and that it points to the root of the git repo where you have build 
+echo Node build path not found! Please check the NODE_ROOT environment variable exists and that it points to the root of the git repo where you have build  node
 goto exit
 :gyp-file-missing
 echo Could not locate a gyp file. module.gyp file was not found.
