@@ -369,10 +369,11 @@ private:
   }
 };
 
-
-
-extern "C" void init(Handle<Object> target)
-{
-  HandleScope scope;
-  Parser::Initialize(target);
-}
+extern "C" {
+  static void init (Handle<Object> target)
+  {
+    Parser::Initialize(target);
+  }
+  //Changed the name cause I couldn't load the module with - in their names
+  NODE_MODULE(node_expat, init);
+};
