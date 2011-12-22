@@ -4,7 +4,7 @@
 ,"description": "NodeJS binding for fast XML parsing."
 ,"scripts" : { "install": "node-waf configure build"
 	      ,"update": "node-waf build"
-	      ,"test": "node test.js"
+	      ,"test": "vows --spec ./test.js"
 	     }
 ,"dependencies": []
 ,"devDependencies": {"vows": ">=0.5.12"}
@@ -20,5 +20,4 @@
 ,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel"]
 ,"licenses": [{ "type": "MIT" }]
 ,"engine": "node"
-,"scripts": {"test":"vows --spec ./test.js"}
 }
