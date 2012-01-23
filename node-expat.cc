@@ -351,7 +351,7 @@ private:
     Handle<Value> argv[8] = { sym_entityDecl,
                               entityName ? String::New(entityName) : Null(),
                               Boolean::New(is_parameter_entity),
-                              value ? String::New(value) : Null(),
+                              value ? String::New(value, value_length) : Null(),
                               base ? String::New(base) : Null(),
                               systemId ? String::New(systemId) : Null(),
                               publicId ? String::New(publicId) : Null(),
