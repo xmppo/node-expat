@@ -6,7 +6,7 @@
 	      ,"update": "node-waf build"
 	      ,"test": "vows --spec ./test.js"
 	     }
-,"dependencies": []
+,"dependencies": {}
 ,"devDependencies": {"vows": ">=0.5.12"}
 ,"repositories": [{ "type": "git"
 		   ,"path": "git://github.com/astro/node-expat.git"
