@@ -249,5 +249,35 @@ vows.describe('node-expat').addBatch({
            assert.ok(result2);
 
         }*/
+    },
+    'statistics': {
+	'line number': function() {
+	    var p = new expat.Parser();
+	    assert.equal(p.getCurrentLineNumber(), 1);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentLineNumber(), 2);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentLineNumber(), 3);
+	},
+	'column number': function() {
+	    var p = new expat.Parser();
+	    assert.equal(p.getCurrentColumnNumber(), 0);
+	    p.parse(" ");
+	    assert.equal(p.getCurrentColumnNumber(), 1);
+	    p.parse(" ");
+	    assert.equal(p.getCurrentColumnNumber(), 2);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentColumnNumber(), 0);
+	},
+	'byte index': function() {
+	    var p = new expat.Parser();
+	    assert.equal(p.getCurrentByteIndex(), -1);
+	    p.parse("");
+	    assert.equal(p.getCurrentByteIndex(), -1);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentByteIndex(), 1);
+	    p.parse(" ");
+	    assert.equal(p.getCurrentByteIndex(), 2);
+	},
     }
 }).export(module);

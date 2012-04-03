@@ -29,6 +29,9 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
     NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
     NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
+    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentLineNumber", GetCurrentLineNumber);
+    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentColumnNumber", GetCurrentColumnNumber);
+    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentByteIndex", GetCurrentByteIndex);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
 
@@ -237,6 +240,45 @@ protected:
     enum XML_Error code;
     code = XML_GetErrorCode(parser);
     return XML_ErrorString(code);
+  }
+
+  static Handle<Value> GetCurrentLineNumber(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    return scope.Close(Integer::NewFromUnsigned(parser->getCurrentLineNumber()));
+  }
+
+  uint32_t getCurrentLineNumber()
+  {
+    return XML_GetCurrentLineNumber(parser);
+  }
+
+  static Handle<Value> GetCurrentColumnNumber(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    return scope.Close(Integer::NewFromUnsigned(parser->getCurrentColumnNumber()));
+  }
+
+  uint32_t getCurrentColumnNumber()
+  {
+    return XML_GetCurrentColumnNumber(parser);
+  }
+
+  static Handle<Value> GetCurrentByteIndex(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    return scope.Close(Integer::New(parser->getCurrentByteIndex()));
+  }
+
+  int32_t getCurrentByteIndex()
+  {
+    return XML_GetCurrentByteIndex(parser);
   }
 
 private:
