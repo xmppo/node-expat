@@ -1,5 +1,5 @@
 { "name": "node-expat"
-,"version": "1.4.5"
+,"version": "1.5.0"
 ,"main": "./lib/node-expat"
 ,"description": "NodeJS binding for fast XML parsing."
 ,"keywords": ["xml","sax","expat","libexpat","parse","parsing"]
@@ -18,7 +18,7 @@
 	   , "email": "astro@spaceboyz.net"
 	   , "web": "http://spaceboyz.net/~astro/"
 	   }
-,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel"]
+,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel", "Alexey Zhuchkov", "Satyam Shekhar"]
 ,"licenses": [{ "type": "MIT" }]
 ,"engines": { "node": ">=0.4" }
 }
