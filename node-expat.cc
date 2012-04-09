@@ -29,6 +29,7 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
     NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
     NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
+    NODE_SET_PROTOTYPE_METHOD(t, "reset", Reset);
     NODE_SET_PROTOTYPE_METHOD(t, "getCurrentLineNumber", GetCurrentLineNumber);
     NODE_SET_PROTOTYPE_METHOD(t, "getCurrentColumnNumber", GetCurrentColumnNumber);
     NODE_SET_PROTOTYPE_METHOD(t, "getCurrentByteIndex", GetCurrentByteIndex);
@@ -73,6 +74,16 @@ protected:
     parser = XML_ParserCreate(encoding);
     assert(parser != NULL);
 
+    attachHandlers();
+  }
+
+  ~Parser()
+  {
+    XML_ParserFree(parser);
+  }
+
+  void attachHandlers()
+  {
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, StartElement, EndElement);
     XML_SetCharacterDataHandler(parser, Text);
@@ -82,12 +93,7 @@ protected:
     XML_SetXmlDeclHandler(parser, XmlDecl);
     XML_SetEntityDeclHandler(parser, EntityDecl);
   }
-
-  ~Parser()
-  {
-    XML_ParserFree(parser);
-  }
-
+    
   /*** parse() ***/
 
   static Handle<Value> Parse(const Arguments& args)
@@ -235,6 +241,27 @@ protected:
     return XML_ResumeParser(parser) != 0;
   }
   
+  static Handle<Value> Reset(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+    XML_Char *encoding = NULL;
+    if (args.Length() == 1 && args[0]->IsString())
+      {
+        encoding = new XML_Char[32];
+        args[0]->ToString()->WriteAscii(encoding, 0, 32);
+      }
+
+    int status = parser->reset(encoding);
+    if (status) 
+      parser->attachHandlers();
+    return scope.Close(status ? True() : False());
+  }
+
+  int reset(XML_Char *encoding)
+  {
+      return XML_ParserReset(parser, encoding) != 0;
+  }
   const XML_LChar *getError()
   {
     enum XML_Error code;
@@ -287,7 +314,7 @@ private:
 
   /* no default ctor */
   Parser();
-
+        
   /*** SAX callbacks ***/
   /* Should a local HandleScope be used in those callbacks? */
 
