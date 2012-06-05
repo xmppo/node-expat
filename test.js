@@ -22,9 +22,13 @@ function collapseTexts(evs) {
 }
 
 function expect(s, evs_expected) {
-    for(var step = s.length; step > 0; step--) {
+  for(var step = s.length; step > 0; step--) {
+    expectWithParserAndStep(s, evs_expected, new expat.Parser("UTF-8"), step);
+  }
+}
+
+function expectWithParserAndStep(s, evs_expected, p, step) {
 	var evs_received = [];
-	var p = new expat.Parser("UTF-8");
 	//p.setEncoding("UTF-8");
 	p.addListener('startElement', function(name, attrs) {
 	    evs_received.push(['startElement', name, attrs]);
@@ -66,7 +70,6 @@ function expect(s, evs_expected) {
 	var expected = JSON.stringify(evs_expected);
 	var received = JSON.stringify(collapseTexts(evs_received));
 	assert.equal(received, expected);
-    }
 }
 
 vows.describe('node-expat').addBatch({
@@ -170,6 +173,27 @@ vows.describe('node-expat').addBatch({
 	    expect("<&", [['error']]);
 	}
     },
+
+    'reset': {
+  'complete doc without error': function() {
+	    var p = new expat.Parser("UTF-8");
+	    expectWithParserAndStep("<start><first /><second>text</second></start>", [['startElement', 'start', {}], ['startElement', 'first', {}],  ['endElement', 'first'],  ['startElement', 'second', {}], ['text', "text"], ['endElement', 'second'], ['endElement', 'start']], p, 1000);
+      p.reset();
+	    expectWithParserAndStep("<restart><third>moretext</third><fourth /></restart>", [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', "moretext"], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000);
+  },
+  'incomplete doc without error': function() {
+      var p = new expat.Parser("UTF-8");
+	    expectWithParserAndStep("<start><first /><second>text</second>", [['startElement', 'start', {}], ['startElement', 'first', {}],  ['endElement', 'first'],  ['startElement', 'second', {}], ['text', "text"], ['endElement', 'second']], p, 1000);
+      p.reset();
+	    expectWithParserAndStep("<restart><third>moretext</third><fourth /></restart>", [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', "moretext"], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000);     
+  },
+  'with doc error': function() {
+	    var p = new expat.Parser("UTF-8");
+	    expectWithParserAndStep("</end>", [["error"]], p, 1000);
+      p.reset();
+	    expectWithParserAndStep("<restart><third>moretext</third><fourth /></restart>", [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', "moretext"], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000);
+  }
+    },
     'stop and resume': {
 	topic: function() {
 	    var cb = this.callback;
@@ -249,5 +273,35 @@ vows.describe('node-expat').addBatch({
            assert.ok(result2);
 
         }*/
+    },
+    'statistics': {
+	'line number': function() {
+	    var p = new expat.Parser();
+	    assert.equal(p.getCurrentLineNumber(), 1);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentLineNumber(), 2);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentLineNumber(), 3);
+	},
+	'column number': function() {
+	    var p = new expat.Parser();
+	    assert.equal(p.getCurrentColumnNumber(), 0);
+	    p.parse(" ");
+	    assert.equal(p.getCurrentColumnNumber(), 1);
+	    p.parse(" ");
+	    assert.equal(p.getCurrentColumnNumber(), 2);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentColumnNumber(), 0);
+	},
+	'byte index': function() {
+	    var p = new expat.Parser();
+	    assert.equal(p.getCurrentByteIndex(), -1);
+	    p.parse("");
+	    assert.equal(p.getCurrentByteIndex(), -1);
+	    p.parse("\n");
+	    assert.equal(p.getCurrentByteIndex(), 1);
+	    p.parse(" ");
+	    assert.equal(p.getCurrentByteIndex(), 2);
+	},
     }
 }).export(module);

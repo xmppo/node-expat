@@ -1,23 +1,24 @@
 { "name": "node-expat"
-,"version": "1.4.1-streams"
+,"version": "1.5.0-streams"
 ,"main": "./lib/node-expat"
 ,"description": "NodeJS binding for fast XML parsing."
+,"keywords": ["xml","sax","expat","libexpat","parse","parsing"]
 ,"scripts" : { "install": "node-waf configure build"
 	      ,"update": "node-waf build"
 	      ,"test": "vows --spec ./test.js"
 	     }
-,"dependencies": []
+,"dependencies": {}
 ,"devDependencies": {"vows": ">=0.5.12"}
-,"repositories": [{ "type": "git"
-		   ,"path": "git://github.com/astro/node-expat.git"
-		  }]
+,"repository": { "type": "git"
+	       , "path": "git://github.com/astro/node-expat.git"
+	       }
 ,"homepage": "http://github.com/astro/node-expat"
 ,"bugs": "http://github.com/astro/node-expat/issues"
-,"maintainers": [{ "name": "Astro"
-		  ,"email": "astro@spaceboyz.net"
-		  ,"web": "http://spaceboyz.net/~astro/"
-		 }]
-,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel"]
+,"author": { "name": "Astro"
+	   , "email": "astro@spaceboyz.net"
+	   , "web": "http://spaceboyz.net/~astro/"
+	   }
+,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel", "Alexey Zhuchkov", "Satyam Shekhar"]
 ,"licenses": [{ "type": "MIT" }]
-,"engine": "node"
+,"engines": { "node": ">=0.4" }
 }

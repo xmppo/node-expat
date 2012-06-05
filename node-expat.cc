@@ -29,6 +29,10 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
     NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
     NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
+    NODE_SET_PROTOTYPE_METHOD(t, "reset", Reset);
+    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentLineNumber", GetCurrentLineNumber);
+    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentColumnNumber", GetCurrentColumnNumber);
+    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentByteIndex", GetCurrentByteIndex);
 
     target->Set(String::NewSymbol("Parser"), t->GetFunction());
 
@@ -70,6 +74,16 @@ protected:
     parser = XML_ParserCreate(encoding);
     assert(parser != NULL);
 
+    attachHandlers();
+  }
+
+  ~Parser()
+  {
+    XML_ParserFree(parser);
+  }
+
+  void attachHandlers()
+  {
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, StartElement, EndElement);
     XML_SetCharacterDataHandler(parser, Text);
@@ -79,12 +93,7 @@ protected:
     XML_SetXmlDeclHandler(parser, XmlDecl);
     XML_SetEntityDeclHandler(parser, EntityDecl);
   }
-
-  ~Parser()
-  {
-    XML_ParserFree(parser);
-  }
-
+    
   /*** parse() ***/
 
   static Handle<Value> Parse(const Arguments& args)
@@ -232,11 +241,71 @@ protected:
     return XML_ResumeParser(parser) != 0;
   }
   
+  static Handle<Value> Reset(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+    XML_Char *encoding = NULL;
+    if (args.Length() == 1 && args[0]->IsString())
+      {
+        encoding = new XML_Char[32];
+        args[0]->ToString()->WriteAscii(encoding, 0, 32);
+      }
+
+    int status = parser->reset(encoding);
+    if (status) 
+      parser->attachHandlers();
+    return scope.Close(status ? True() : False());
+  }
+
+  int reset(XML_Char *encoding)
+  {
+      return XML_ParserReset(parser, encoding) != 0;
+  }
   const XML_LChar *getError()
   {
     enum XML_Error code;
     code = XML_GetErrorCode(parser);
     return XML_ErrorString(code);
+  }
+
+  static Handle<Value> GetCurrentLineNumber(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    return scope.Close(Integer::NewFromUnsigned(parser->getCurrentLineNumber()));
+  }
+
+  uint32_t getCurrentLineNumber()
+  {
+    return XML_GetCurrentLineNumber(parser);
+  }
+
+  static Handle<Value> GetCurrentColumnNumber(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    return scope.Close(Integer::NewFromUnsigned(parser->getCurrentColumnNumber()));
+  }
+
+  uint32_t getCurrentColumnNumber()
+  {
+    return XML_GetCurrentColumnNumber(parser);
+  }
+
+  static Handle<Value> GetCurrentByteIndex(const Arguments& args)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
+
+    return scope.Close(Integer::New(parser->getCurrentByteIndex()));
+  }
+
+  int32_t getCurrentByteIndex()
+  {
+    return XML_GetCurrentByteIndex(parser);
   }
 
 private:
@@ -245,7 +314,7 @@ private:
 
   /* no default ctor */
   Parser();
-
+        
   /*** SAX callbacks ***/
   /* Should a local HandleScope be used in those callbacks? */
 
@@ -351,7 +420,7 @@ private:
     Handle<Value> argv[8] = { sym_entityDecl,
                               entityName ? String::New(entityName) : Null(),
                               Boolean::New(is_parameter_entity),
-                              value ? String::New(value) : Null(),
+                              value ? String::New(value, value_length) : Null(),
                               base ? String::New(base) : Null(),
                               systemId ? String::New(systemId) : Null(),
                               publicId ? String::New(publicId) : Null(),
