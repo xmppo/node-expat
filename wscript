@@ -18,7 +18,7 @@ def configure(conf):
 
 def build(bld):
   obj = bld.new_task_gen('cxx', 'shlib', 'node_addon')
-  obj.target = 'node-expat'
+  obj.target = 'node_expat'
   obj.source = 'node-expat.cc'
   obj.includes = [ '/usr/include', '/usr/local/include' ]
   obj.libpath = [ '/usr/lib', '/usr/lib64', '/usr/local/lib', '/usr/local/lib64' ]
