@@ -186,7 +186,7 @@ vows.describe('node-expat').addBatch({
       var p = new expat.Parser("UTF-8");
 	    expectWithParserAndStep("<start><first /><second>text</second>", [['startElement', 'start', {}], ['startElement', 'first', {}],  ['endElement', 'first'],  ['startElement', 'second', {}], ['text', "text"], ['endElement', 'second']], p, 1000);
       p.reset();
-	    expectWithParserAndStep("<restart><third>moretext</third><fourth /></restart>", [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', "moretext"], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000);     
+	    expectWithParserAndStep("<restart><third>moretext</third><fourth /></restart>", [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', "moretext"], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000);
   },
   'with doc error': function() {
 	    var p = new expat.Parser("UTF-8");
@@ -259,8 +259,8 @@ vows.describe('node-expat').addBatch({
 	    var p = new expat.Parser("UTF-8");
 	    p.parse('');
 	    assert.ok(true, "Did not segfault");
-	}, 
- 	
+	},
+
 	'parsing twice the same document with the same parser instance should be fine': 'reset() not yet implemented'
 	/*function() {
 	   var p = new expat.Parser("UTF-8");
