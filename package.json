@@ -18,7 +18,7 @@
 	   , "email": "astro@spaceboyz.net"
 	   , "web": "http://spaceboyz.net/~astro/"
 	   }
-,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel", "Alexey Zhuchkov", "Satyam Shekhar"]
+,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel", "Alexey Zhuchkov", "Satyam Shekhar", "Dhruv Matani", "Andreas Botsikas"]
 ,"licenses": [{ "type": "MIT" }]
 ,"engines": { "node": ">=0.4" }
 }
