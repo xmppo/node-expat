@@ -19,11 +19,16 @@ be bullshit, given my few node.js experience.
 
 ## Instructions ##
 
-    node-waf configure
-    node-waf build
+Install dependencies:
 
-For using the library, make sure `build/default/expat.node` is in
-either `$NODE_PATH` or `require.paths`.
+* Debian/Ubuntu: `apt-get install libexpat1-dev`
+* Centos/Red Hat: `yum install expat-devel`
+
+Install node-expat:
+
+    npm i node-expat
+
+## Usage ##
 
 Important events emitted by a parser:
 
