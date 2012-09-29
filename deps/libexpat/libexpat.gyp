@@ -64,6 +64,13 @@
           '.',
           'lib',
         ],
+        'conditions': [
+          ['OS=="win"', {
+            'defines': [
+              'XML_STATIC'
+            ]
+          }]
+        ],
       },
     },
 
