@@ -56,21 +56,15 @@
         'HAVE_EXPAT_CONFIG_H'
       ],
       'include_dirs': [
+        '.',
         'lib',
-        # platform and arch-specific headers
-        'config/<(OS)/<(target_arch)'
       ],
       'direct_dependent_settings': {
         'include_dirs': [
+          '.',
           'lib',
-          # platform and arch-specific headers
-          'config/<(OS)/<(target_arch)'
         ],
       },
-      'conditions': [
-        ['target_arch=="arm"', {
-        }],
-      ]
     },
 
     {
