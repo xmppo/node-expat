@@ -3,8 +3,8 @@
     {
       'target_name': 'node_expat',
       'sources': [ 'node-expat.cc' ],
-      'libraries': [
-        '-lexpat'
+      'dependencies': [
+        'deps/libexpat/libexpat.gyp:expat'
       ]
     }
   ]
