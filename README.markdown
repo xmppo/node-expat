@@ -19,11 +19,6 @@ be bullshit, given my few node.js experience.
 
 ## Instructions ##
 
-Install dependencies:
-
-* Debian/Ubuntu: `apt-get install libexpat1-dev`
-* Centos/Red Hat: `yum install expat-devel`
-
 Install node-expat:
 
     npm i node-expat
