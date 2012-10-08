@@ -58,14 +58,16 @@ function expectWithParserAndStep(s, evs_expected, p, step) {
 	p.addListener('entityDecl', function(entityName, isParameterEntity, value, base, systemId, publicId, notationName) {
 	    evs_received.push(['entityDecl', entityName, isParameterEntity, value, base, systemId, publicId, notationName]);
 	});
+	p.addListener('error', function(e) {
+	    evs_received.push(['error', e]);
+	});
 	for(var l = 0; l < s.length; l += step)
 	{
 	    var end = l + step;
 	    if (end > s.length)
 		end = s.length;
 
-	    if (!p.parse(s.slice(l, end), false))
-		evs_received.push(['error']);
+	    p.write(s.slice(l, end));
 	}
 
 	var expected = JSON.stringify(evs_expected);
@@ -171,7 +173,7 @@ vows.describe('node-expat').addBatch({
     },
     'error': {
 	'tag name starting with ampersand': function() {
-	    expect("<&", [['error']]);
+	    expect("<&", [['error', "not well-formed (invalid token)"]]);
 	}
     },
 
@@ -190,7 +192,7 @@ vows.describe('node-expat').addBatch({
   },
   'with doc error': function() {
 	    var p = new expat.Parser("UTF-8");
-	    expectWithParserAndStep("</end>", [["error"]], p, 1000);
+	    expectWithParserAndStep("</end>", [["error", "not well-formed (invalid token)"]], p, 1000);
       p.reset();
 	    expectWithParserAndStep("<restart><third>moretext</third><fourth /></restart>", [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', "moretext"], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000);
   }
