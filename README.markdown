@@ -14,8 +14,7 @@ A stupid speed test is supplied in `bench.js`. We measure how many
 - [libxmljs](http://github.com/polotek/libxmljs) (libxml2 binding): 77,000 el/s
 - [node-expat](http://github.com/astro/node-expat) (libexpat binding, this): 113,000 el/s
 
-These numbers were recorded on a Core 2 2400 MHz and may turn out to
-be bullshit, given my few node.js experience.
+These numbers were recorded on a Core 2 2400 MHz.
 
 ## Instructions ##
 
@@ -41,6 +40,9 @@ stop() and resume() methods.
 We don't emit an error event because libexpat doesn't use a callback
 either. Instead, check that `parse()` returns `true`. A descriptive
 string can be obtained via `getError()` to provide user feedback.
+
+Alternatively, use the Parser like a node Stream. `write()` will emit
+error events.
 
 ## Namespace handling ##
 
