@@ -1,4 +1,4 @@
-{ "name": "node-expat"
+{ "name": "expat"
 ,"version": "2.0.0"
 ,"main": "./lib/node-expat"
 ,"description": "NodeJS binding for fast XML parsing."
