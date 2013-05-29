@@ -28,9 +28,9 @@ Important events emitted by a parser:
 
 ```javascript
 (function () {
-"use strict";
+  "use strict";
 
-  var expat = require('./lib/node-expat')
+  var expat = require('node-expat')
     , parser
     ;
 
@@ -44,6 +44,10 @@ Important events emitted by a parser:
   parser.on('text', function (text) {
     console.log(text);
   });
+  parser.on('error', function (err) {
+    console.error(err); 
+  });
+  parser.write("<html><head><title>Hello World</title></head><body><p>Foobar</p></body></html>");
 }());
 
 ```
