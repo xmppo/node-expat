@@ -1,4 +1,4 @@
-#include <nan.h>
+#include <node_modules/nan/nan.h>
 extern "C" {
 #include <expat.h>
 }
