@@ -1,4 +1,7 @@
-#include <nan.h>
+#include <node.h>
+#include <node_version.h>
+#include <node_object_wrap.h>
+#include <node_buffer.h>
 extern "C" {
 #include <expat.h>
 }
@@ -6,11 +9,17 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
+static Persistent<String> sym_startElement, sym_endElement,
+  sym_startCdata, sym_endCdata,
+  sym_text, sym_processingInstruction,
+  sym_comment, sym_xmlDecl, sym_entityDecl,
+  sym_emit;
+
 class Parser : public ObjectWrap {
 public:
   static void Initialize(Handle<Object> target)
   {
-    NanScope();
+    HandleScope scope;
     Local<FunctionTemplate> t = FunctionTemplate::New(New);
 
     t->InstanceTemplate()->SetInternalFieldCount(1);
@@ -25,27 +34,38 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "getCurrentColumnNumber", GetCurrentColumnNumber);
     NODE_SET_PROTOTYPE_METHOD(t, "getCurrentByteIndex", GetCurrentByteIndex);
 
-    target->Set(NanSymbol("Parser"), t->GetFunction());
+    target->Set(String::NewSymbol("Parser"), t->GetFunction());
+
+    sym_startElement = NODE_PSYMBOL("startElement");
+    sym_endElement = NODE_PSYMBOL("endElement");
+    sym_startCdata = NODE_PSYMBOL("startCdata");
+    sym_endCdata = NODE_PSYMBOL("endCdata");
+    sym_text = NODE_PSYMBOL("text");
+    sym_processingInstruction = NODE_PSYMBOL("processingInstruction");
+    sym_comment = NODE_PSYMBOL("comment");
+    sym_xmlDecl = NODE_PSYMBOL("xmlDecl");
+    sym_entityDecl = NODE_PSYMBOL("entityDecl");
+    sym_emit = NODE_PSYMBOL("emit");
   }
 
 protected:
   /*** Constructor ***/
 
-  static NAN_METHOD(New)
+  static Handle<Value> New(const Arguments& args)
   {
-    NanScope();
+    HandleScope scope;
     XML_Char *encoding = NULL;
     if (args.Length() == 1 && args[0]->IsString())
       {
         encoding = new XML_Char[32];
-        NanFromV8String(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        args[0]->ToString()->WriteAscii(encoding, 0, 32);
       }
 
     Parser *parser = new Parser(encoding);
     if (encoding)
       delete[] encoding;
     parser->Wrap(args.This());
-    NanReturnValue(args.This());
+    return args.This();
   }
 
   Parser(const XML_Char *encoding)
@@ -76,10 +96,10 @@ protected:
     
   /*** parse() ***/
 
-  static NAN_METHOD(Parse)
+  static Handle<Value> Parse(const Arguments& args)
   {
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
-    NanScope();
+    HandleScope scope;
     Local<String> str;
     int isFinal = 0;
 
@@ -93,25 +113,29 @@ protected:
     if (args.Length() >= 1 && args[0]->IsString())
       {
         str = args[0]->ToString();
-        NanReturnValue(parser->parseString(**str, isFinal) ? True() : False());
+        return scope.Close(parser->parseString(**str, isFinal) ? True() : False());
       }
     else if (args.Length() >= 1 && args[0]->IsObject())
       {
         Local<Object> obj = args[0]->ToObject();
         if (Buffer::HasInstance(obj))
         {
-          NanReturnValue(parser->parseBuffer(obj, isFinal) ? True() : False());
+#if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+          Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+          return scope.Close(parser->parseBuffer(*buffer, isFinal) ? True() : False());
+#else
+          return scope.Close(parser->parseBuffer(obj, isFinal) ? True() : False());
+#endif
         }
         else
-        {
-          NanThrowTypeError("Parse buffer must be String or Buffer");
-          NanReturnUndefined();
-        }
+          return ThrowException(
+            Exception::TypeError(
+              String::New("Parse buffer must be String or Buffer")));
       }
-    else {
-      NanThrowTypeError("Parse buffer must be String or Buffer");
-      NanReturnUndefined();
-    }
+    else
+      return ThrowException(
+        Exception::TypeError(
+          String::New("Parse buffer must be String or Buffer")));
   }
 
   /** Parse a v8 String by first writing it to the expat parser's
@@ -130,31 +154,38 @@ protected:
   }
 
   /** Parse a node.js Buffer directly */
+#if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+  bool parseBuffer(Buffer &buffer, int isFinal)
+  {
+    return XML_Parse(parser, buffer.data(), buffer.length(), isFinal) != XML_STATUS_ERROR;
+  }
+#else
   bool parseBuffer(Local<Object> buffer, int isFinal)
   {
     return XML_Parse(parser, Buffer::Data(buffer), Buffer::Length(buffer), isFinal) != XML_STATUS_ERROR;
   }
+#endif
 
   /*** setEncoding() ***/
 
-  static NAN_METHOD(SetEncoding)
+  static Handle<Value> SetEncoding(const Arguments& args)
   {
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
-    NanScope();
+    HandleScope scope;
 
     if (args.Length() == 1 && args[0]->IsString())
       {
         XML_Char *encoding = new XML_Char[32];
-        NanFromV8String(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        args[0]->ToString()->WriteAscii(encoding, 0, 32);
 
         int status = parser->setEncoding(encoding);
 
         delete[] encoding;
 
-        NanReturnValue(status ? True() : False());
+        return scope.Close(status ? True() : False());
       }
     else
-      NanReturnValue(False());
+      return False();
   }
 
   int setEncoding(XML_Char *encoding)
@@ -164,28 +195,28 @@ protected:
 
   /*** getError() ***/
 
-  static NAN_METHOD(GetError)
+  static Handle<Value> GetError(const Arguments& args)
   {
-    NanScope();
+    HandleScope scope;
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
 
     const XML_LChar *error = parser->getError();
     if (error)
-      NanReturnValue(String::New(error));
+      return scope.Close(String::New(error));
     else
-      NanReturnValue(Null());
+      return scope.Close(Null());
   }
   
   /*** stop() ***/
 
-  static NAN_METHOD(Stop)
+  static Handle<Value> Stop(const Arguments& args)
   {
-    NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
 
     int status = parser->stop();
     
-    NanReturnValue(status ? True() : False());
+    return scope.Close(status ? True() : False());
   }
 
   int stop()
@@ -195,14 +226,14 @@ protected:
   
   /*** resume() ***/
 
-  static NAN_METHOD(Resume)
+  static Handle<Value> Resume(const Arguments& args)
   {
-    NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
 
     int status = parser->resume();
     
-    NanReturnValue(status ? True() : False());
+    return scope.Close(status ? True() : False());
   }
 
   int resume()
@@ -210,21 +241,21 @@ protected:
     return XML_ResumeParser(parser) != 0;
   }
   
-  static NAN_METHOD(Reset)
+  static Handle<Value> Reset(const Arguments& args)
   {
-    NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
     XML_Char *encoding = NULL;
     if (args.Length() == 1 && args[0]->IsString())
       {
         encoding = new XML_Char[32];
-        NanFromV8String(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        args[0]->ToString()->WriteAscii(encoding, 0, 32);
       }
 
     int status = parser->reset(encoding);
     if (status) 
       parser->attachHandlers();
-    NanReturnValue(status ? True() : False());
+    return scope.Close(status ? True() : False());
   }
 
   int reset(XML_Char *encoding)
@@ -238,12 +269,12 @@ protected:
     return XML_ErrorString(code);
   }
 
-  static NAN_METHOD(GetCurrentLineNumber)
+  static Handle<Value> GetCurrentLineNumber(const Arguments& args)
   {
-    NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
 
-    NanReturnValue(Integer::NewFromUnsigned(parser->getCurrentLineNumber()));
+    return scope.Close(Integer::NewFromUnsigned(parser->getCurrentLineNumber()));
   }
 
   uint32_t getCurrentLineNumber()
@@ -251,12 +282,12 @@ protected:
     return XML_GetCurrentLineNumber(parser);
   }
 
-  static NAN_METHOD(GetCurrentColumnNumber)
+  static Handle<Value> GetCurrentColumnNumber(const Arguments& args)
   {
-    NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
 
-    NanReturnValue(Integer::NewFromUnsigned(parser->getCurrentColumnNumber()));
+    return scope.Close(Integer::NewFromUnsigned(parser->getCurrentColumnNumber()));
   }
 
   uint32_t getCurrentColumnNumber()
@@ -264,12 +295,12 @@ protected:
     return XML_GetCurrentColumnNumber(parser);
   }
 
-  static NAN_METHOD(GetCurrentByteIndex)
+  static Handle<Value> GetCurrentByteIndex(const Arguments& args)
   {
-    NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    HandleScope scope;
 
-    NanReturnValue(Integer::New(parser->getCurrentByteIndex()));
+    return scope.Close(Integer::New(parser->getCurrentByteIndex()));
   }
 
   int32_t getCurrentByteIndex()
@@ -290,7 +321,6 @@ private:
   static void StartElement(void *userData,
                            const XML_Char *name, const XML_Char **atts)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Collect atts into JS object */
@@ -299,7 +329,7 @@ private:
       attr->Set(String::New(atts1[0]), String::New(atts1[1]));
 
     /* Trigger event */
-    Handle<Value> argv[3] = { NanSymbol("startElement"),
+    Handle<Value> argv[3] = { sym_startElement,
                               String::New(name),
                               attr };
     parser->Emit(3, argv);
@@ -308,42 +338,38 @@ private:
   static void EndElement(void *userData,
                          const XML_Char *name)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanSymbol("endElement"), String::New(name) };
+    Handle<Value> argv[2] = { sym_endElement, String::New(name) };
     parser->Emit(2, argv);
   }
   
   static void StartCdata(void *userData)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { NanSymbol("startCdata") };
+    Handle<Value> argv[1] = { sym_startCdata };
     parser->Emit(1, argv);
   }
 
   static void EndCdata(void *userData)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { NanSymbol("endCdata") };
+    Handle<Value> argv[1] = { sym_endCdata };
     parser->Emit(1, argv);
   }
 
   static void Text(void *userData,
                    const XML_Char *s, int len)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanSymbol("text"),
+    Handle<Value> argv[2] = { sym_text,
                               String::New(s, len) };
     parser->Emit(2, argv);
   }
@@ -351,11 +377,10 @@ private:
   static void ProcessingInstruction(void *userData,
                                     const XML_Char *target, const XML_Char *data)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[3] = { NanSymbol("processingInstruction"),
+    Handle<Value> argv[3] = { sym_processingInstruction,
                               String::New(target),
                               String::New(data) };
     parser->Emit(3, argv);
@@ -364,11 +389,10 @@ private:
   static void Comment(void *userData,
                       const XML_Char *data)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanSymbol("comment"), String::New(data) };
+    Handle<Value> argv[2] = { sym_comment, String::New(data) };
     parser->Emit(2, argv);
   }
 
@@ -376,16 +400,13 @@ private:
                       const XML_Char *version, const XML_Char *encoding,
                       int standalone)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Local<Value> argv[4] = { NanSymbol("xmlDecl"),
-                              version ? NanNewLocal<Value>(String::New(version))
-                                      : NanNewLocal<Value>(Null()),
-                              encoding ? NanNewLocal<Value>(String::New(encoding))
-                                      : NanNewLocal<Value>(Null()),
-                              NanNewLocal<Value>(Boolean::New(standalone)) };
+    Handle<Value> argv[4] = { sym_xmlDecl,
+                              version ? String::New(version) : Null(),
+                              encoding ? String::New(encoding) : Null(),
+                              Boolean::New(standalone) };
     parser->Emit(4, argv);
   }
 
@@ -393,35 +414,27 @@ private:
                          const XML_Char *value, int value_length, const XML_Char *base,
                          const XML_Char *systemId, const XML_Char *publicId, const XML_Char *notationName)
   {
-    NanScope();
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Local<Value> argv[8] = { NanSymbol("entityDecl"),
-                              entityName ? NanNewLocal<Value>(String::New(entityName))
-                                    : NanNewLocal<Value>(Null()),
-                              NanNewLocal<Value>(Boolean::New(is_parameter_entity)),
-                              value ? NanNewLocal<Value>(String::New(value, value_length))
-                                    : NanNewLocal<Value>(Null()),
-                              base ? NanNewLocal<Value>(String::New(base))
-                                    : NanNewLocal<Value>(Null()),
-                              systemId ? NanNewLocal<Value>(String::New(systemId))
-                                    : NanNewLocal<Value>(Null()),
-                              publicId ? NanNewLocal<Value>(String::New(publicId))
-                                    : NanNewLocal<Value>(Null()),
-                              notationName ? NanNewLocal<Value>(String::New(notationName))
-                                    : NanNewLocal<Value>(Null())
+    Handle<Value> argv[8] = { sym_entityDecl,
+                              entityName ? String::New(entityName) : Null(),
+                              Boolean::New(is_parameter_entity),
+                              value ? String::New(value, value_length) : Null(),
+                              base ? String::New(base) : Null(),
+                              systemId ? String::New(systemId) : Null(),
+                              publicId ? String::New(publicId) : Null(),
+                              notationName ? String::New(notationName) : Null(),
     };
     parser->Emit(8, argv);
   }
 
   void Emit(int argc, Handle<Value> argv[])
   {
-    NanScope();
+    HandleScope scope;
 
-    Handle<Object> handle = NanObjectWrapHandle(this);
-    Local<Function> emit = handle->Get(NanSymbol("emit")).As<Function>();
-    emit->Call(handle, argc, argv);
+    Local<Function> emit = Local<Function>::Cast(handle_->Get(sym_emit));
+    emit->Call(handle_, argc, argv);
   }
 };
 
