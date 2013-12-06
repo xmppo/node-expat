@@ -1,22 +1,56 @@
-{ "name": "node-expat"
-,"version": "2.0.0"
-,"main": "./lib/node-expat"
-,"description": "NodeJS binding for fast XML parsing."
-,"keywords": ["xml","sax","expat","libexpat","parse","parsing"]
-,"scripts" : { "test": "vows --spec ./test.js" }
-,"dependencies": {"nan": "~0.6.0"}
-,"devDependencies": {"vows": ">=0.5.12"}
-,"repository": { "type": "git"
-  , "path": "git://github.com/astro/node-expat.git"
+{
+  "name": "node-expat",
+  "version": "2.1.0",
+  "main": "./lib/node-expat",
+  "description": "NodeJS binding for fast XML parsing.",
+  "keywords": [
+    "xml",
+    "sax",
+    "expat",
+    "libexpat",
+    "parse",
+    "parsing"
+  ],
+  "scripts": {
+    "test": "vows --spec ./test.js"
+  },
+  "dependencies": {
+    "nan": "~0.6.0"
+  },
+  "devDependencies": {
+    "vows": ">=0.5.12"
+  },
+  "repository": {
+    "type": "git",
+    "path": "git://github.com/astro/node-expat.git"
+  },
+  "homepage": "http://github.com/astro/node-expat",
+  "bugs": "http://github.com/astro/node-expat/issues",
+  "author": {
+    "name": "Astro",
+    "email": "astro@spaceboyz.net",
+    "web": "http://spaceboyz.net/~astro/"
+  },
+  "contributors": [
+    "Stephan Maka",
+    "Derek Hammer",
+    "Iein Valdez",
+    "Peter Körner",
+    "Camilo Aguilar",
+    "Michael Weibel",
+    "Alexey Zhuchkov",
+    "Satyam Shekhar",
+    "Dhruv Matani",
+    "Andreas Botsikas",
+    "Tom Hughes-Croucher",
+    "Nathan Rajlich"
+  ],
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "engines": {
+    "node": ">=0.8"
   }
-,"homepage": "http://github.com/astro/node-expat"
-,"bugs": "http://github.com/astro/node-expat/issues"
-,"author": {
-    "name": "Astro"
-  , "email": "astro@spaceboyz.net"
-  , "web": "http://spaceboyz.net/~astro/"
-  }
-,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel", "Alexey Zhuchkov", "Satyam Shekhar", "Dhruv Matani", "Andreas Botsikas", "Tom Hughes-Croucher", "Nathan Rajlich"]
-,"licenses": [{ "type": "MIT" }]
-,"engines": { "node": ">=0.8" }
 }
