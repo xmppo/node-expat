@@ -31,6 +31,13 @@
     "email": "astro@spaceboyz.net",
     "web": "http://spaceboyz.net/~astro/"
   },
+  "maintainers": [
+    {
+      "name": "Lloyd Watkin",
+      "email": "lloyd@evilprofessor.co.uk",
+      "web": "http://www.evilprofessor.co.uk"
+    }
+  ],
   "contributors": [
     "Stephan Maka",
     "Derek Hammer",
