@@ -11,11 +11,12 @@
   }
 ,"homepage": "http://github.com/astro/node-expat"
 ,"bugs": "http://github.com/astro/node-expat/issues"
-,"author": { "name": "Astro"
+,"author": {
+    "name": "Astro"
   , "email": "astro@spaceboyz.net"
   , "web": "http://spaceboyz.net/~astro/"
   }
 ,"contributors": ["Stephan Maka", "Derek Hammer", "Iein Valdez", "Peter Körner", "Camilo Aguilar", "Michael Weibel", "Alexey Zhuchkov", "Satyam Shekhar", "Dhruv Matani", "Andreas Botsikas", "Tom Hughes-Croucher", "Nathan Rajlich"]
 ,"licenses": [{ "type": "MIT" }]
-,"engines": { "node": ">=0.4" }
+,"engines": { "node": ">=0.8" }
 }
