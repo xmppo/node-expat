@@ -4,7 +4,7 @@
 ,"description": "NodeJS binding for fast XML parsing."
 ,"keywords": ["xml","sax","expat","libexpat","parse","parsing"]
 ,"scripts" : { "test": "vows --spec ./test.js" }
-,"dependencies": {}
+,"dependencies": {"nan": "~0.6.0"}
 ,"devDependencies": {"vows": ">=0.5.12"}
 ,"repository": { "type": "git"
   , "path": "git://github.com/astro/node-expat.git"
