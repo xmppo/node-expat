@@ -1,11 +1,11 @@
-# node-expat #
+# node-expat 
 
-## Motivation ##
+## Motivation 
 
 You use [node.js](http://github.com/ry/node) for speed? You process
 XML streams? Then you want the fastest XML parser: [libexpat](http://expat.sourceforge.net/)!
 
-## Speed ##
+## Speed 
 
 A stupid speed test is supplied in `bench.js`. We measure how many
 25-byte elements a SAX parser can process:
@@ -16,15 +16,24 @@ A stupid speed test is supplied in `bench.js`. We measure how many
 
 These numbers were recorded on a Core 2 2400 MHz.
 
-## Instructions ##
+## Instructions 
 
 Install node-expat:
 
     npm i node-expat
-    
+  
 ### Installing on windows?
 
 See https://github.com/node-xmpp/node-expat/issues/78 if you are getting errors about not finding `nan.h`.
+
+## Testing
+
+```
+npm test
+```
+
+[![Build Status](https://travis-ci.org/node-xmpp/node-expat.png?branch=v2.1.2)](https://travis-ci.org/node-xmpp/node-expat)
+
 
 ## Usage ##
 
