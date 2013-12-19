@@ -24,6 +24,8 @@ Install node-expat:
   
 ### Installing on windows?
 
+Dependencies for `node-gyp` https://github.com/TooTallNate/node-gyp#installation
+
 See https://github.com/node-xmpp/node-expat/issues/78 if you are getting errors about not finding `nan.h`.
 
 ## Testing
