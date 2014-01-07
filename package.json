@@ -18,7 +18,8 @@
     "nan": "~0.6.0"
   },
   "devDependencies": {
-    "vows": ">=0.5.12"
+    "vows": ">=0.5.12",
+    "iconv": "*"
   },
   "repository": {
     "type": "git",
