@@ -34,7 +34,7 @@ See https://github.com/node-xmpp/node-expat/issues/78 if you are getting errors 
 npm test
 ```
 
-[![Build Status](https://travis-ci.org/node-xmpp/node-expat.png?branch=v2.1.2)](https://travis-ci.org/node-xmpp/node-expat)
+[![Build Status](https://travis-ci.org/node-xmpp/node-expat.png)](https://travis-ci.org/node-xmpp/node-expat)
 
 
 ## Usage ##
