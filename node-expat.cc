@@ -441,6 +441,27 @@ private:
     }
   }
 
+  static int UnknownEncodingConvert(void *data, const char *s)
+  {
+    printf("this is not getting called :-(\n");
+    NanScope();
+    Persistent<Function> *convertCallback = reinterpret_cast<Persistent<Function> *>(data);
+    printf("calling convert: %s\n", s);
+    Handle<Value> argv[1] = { NanNewLocal<Value>(String::New(s))
+    };
+    Handle<Value> code = (*convertCallback)->Call(*convertCallback, 1, argv);
+    return code->IsInt32() ? code->Int32Value() : -1;
+  }
+
+  static void UnknownEncodingRelease(void *data)
+  {
+    NanScope();
+    Persistent<Function> *convertCallback = reinterpret_cast<Persistent<Function> *>(data);
+    (*convertCallback).Dispose();
+    delete convertCallback;
+    printf("release works\n");
+  }
+
   /**
    * Fills xmlEncodingInfo
    */
@@ -458,6 +479,16 @@ private:
           parser->xmlEncodingInfo->map[i] = m->Int32Value();
         else
           NanThrowTypeError("UnknownEncoding map must consist of 256 ints");
+      }
+
+      if (args.Length() >= 2 && args[1]->IsFunction()) {
+        Handle<Function> convertCallback = args[1].As<Function>();
+        Persistent<Function> *data = new Persistent<Function>(convertCallback);
+
+        parser->xmlEncodingInfo->data = data;
+        parser->xmlEncodingInfo->convert = &UnknownEncodingConvert;
+        parser->xmlEncodingInfo->release = &UnknownEncodingRelease;
+        printf("set up callbacks with data=%X\n", convertCallback);
       }
     } else
       NanThrowTypeError("SetUnknownEncoding expects a map array");

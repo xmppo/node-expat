@@ -198,6 +198,38 @@ vows.describe('node-expat').addBatch({
             assert.equal(text, "¥€$");
         }
     },
+    'unknownEncoding with multi-byte convert': {
+        'circled-numbers': function() {
+	    var p = new expat.Parser();
+            var encodingName;
+            p.addListener('unknownEncoding', function(name) {
+                encodingName = name;
+                var map = [];
+                for(var i = 0; i < 256; i++)
+                    map[i] = -2;
+                map[111] = -2;
+                p.setUnknownEncoding(map, function(s) {
+                    console.log("f", s);
+                    var m;
+                    if ((m = s.match(/^o(\d)$/))) {
+                        var num = parseInt(m[1], 10);
+                        return num == 0 ? 0x2469 : 0x245F + num;
+                    } else
+                        return -1;
+                });
+            });
+            var text = "";
+            p.addListener('text', function(s) {
+                text += s;
+            });
+            p.addListener('error', function(e) {
+                assert.fail(e);
+            });
+            p.parse("<?xml version='1.0' encoding='circled-numbers'?><r>äo2o3</r>");
+            assert.equal(encodingName, "circled-numbers");
+            assert.equal(text, "②③");
+        }
+    },
     'error': {
 	'tag name starting with ampersand': function() {
 	    expect("<&", [['error', "not well-formed (invalid token)"]]);
