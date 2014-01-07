@@ -49,6 +49,7 @@ Important events emitted by a parser:
     , parser
     ;
 
+  /* pass encoding only if not specified in XML document */
   parser = new expat.Parser("UTF-8");
   parser.on('startElement', function (name, attrs) {
     console.log(name, attrs);
