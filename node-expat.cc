@@ -449,6 +449,9 @@ private:
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
     NanScope();
 
+    if (!parser->xmlEncodingInfo)
+      NanThrowError("setUnknownEncoding() must be synchronously invoked from an unknownEncoding event handler");
+
     if (args.Length() >= 1 && args[0]->IsArray()) {
       Local<Array> map = args[0].As<Array>();
       /* Copy map */
