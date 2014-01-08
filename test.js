@@ -212,11 +212,10 @@ vows.describe('node-expat').addBatch({
             try {
               var d =  iconv.convert(new Buffer([i])).toString();
             } catch (e) {
-              d = "?";
+              d = '\b';
             }
             map[i] = d.charCodeAt(0);
           }
-          console.log(map)
           p.setUnknownEncoding(map);
         });
         var text = "";
