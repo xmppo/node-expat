@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "vows": ">=0.5.12",
-    "iconv": "*"
+    "iconv": "2.1.0"
   },
   "repository": {
     "type": "git",
