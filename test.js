@@ -1,4 +1,5 @@
 var expat = require('./lib/node-expat');
+var Iconv  = require('iconv').Iconv;
 var Buffer = require('buffer').Buffer;
 var vows = require('vows');
 var assert = require('assert');
@@ -24,13 +25,12 @@ function collapseTexts(evs) {
 
 function expect(s, evs_expected) {
   for(var step = s.length; step > 0; step--) {
-    expectWithParserAndStep(s, evs_expected, new expat.Parser("UTF-8"), step);
+    expectWithParserAndStep(s, evs_expected, new expat.Parser(), step);
   }
 }
 
 function expectWithParserAndStep(s, evs_expected, p, step) {
 	var evs_received = [];
-	//p.setEncoding("UTF-8");
 	p.addListener('startElement', function(name, attrs) {
 	    evs_received.push(['startElement', name, attrs]);
 	});
@@ -170,6 +170,67 @@ vows.describe('node-expat').addBatch({
 	    expect("<!-- no comment -->",
 		[['comment', ' no comment ']]);
 	}
+    },
+    'unknownEncoding with single-byte map': {
+        'Windows-1252': function() {
+	    var p = new expat.Parser();
+            var encodingName;
+            p.addListener('unknownEncoding', function(name) {
+                encodingName = name;
+                var map = [];
+                for(var i = 0; i < 256; i++)
+                    map[i] = i;
+                map[165] = 0x00A5;  // ¥
+                map[128] = 0x20AC;  // €
+                map[ 36] = 0x0024;  // $
+                p.setUnknownEncoding(map);
+            });
+            var text = "";
+            p.addListener('text', function(s) {
+                text += s;
+            });
+            p.addListener('error', function(e) {
+                assert.fail(e);
+            });
+            p.parse("<?xml version='1.0' encoding='Windows-1252'?><r>");
+            p.parse(new Buffer([165, 128, 36]));
+            p.parse("</r>");
+            assert.equal(encodingName, "Windows-1252");
+            assert.equal(text, "¥€$");
+        }
+    },
+    'unknownEncoding with single-byte map using iconv': {
+      'Windows-1252': function() {
+        var p = new expat.Parser();
+        var encodingName;
+        p.addListener('unknownEncoding', function(name) {
+          encodingName = name;
+          var iconv = new Iconv(encodingName + '//TRANSLIT//IGNORE', 'UTF-8');
+          var map = [];
+
+          for(var i = 0; i < 256; i++) {
+            try {
+              var d =  iconv.convert(new Buffer([i])).toString();
+            } catch (e) {
+              d = '\b';
+            }
+            map[i] = d.charCodeAt(0);
+          }
+          p.setUnknownEncoding(map);
+        });
+        var text = "";
+        p.addListener('text', function(s) {
+          text += s;
+        });
+        p.addListener('error', function(e) {
+          assert.fail(e);
+        });
+        p.parse("<?xml version='1.0' encoding='Windows-1252'?><r>");
+        p.parse(new Buffer([165, 128, 36]));
+        p.parse("</r>");
+        assert.equal(encodingName, "Windows-1252");
+        assert.equal("¥€$", text);
+      }
     },
     'error': {
 	'tag name starting with ampersand': function() {
