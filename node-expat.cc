@@ -17,6 +17,7 @@ public:
 
     NODE_SET_PROTOTYPE_METHOD(t, "parse", Parse);
     NODE_SET_PROTOTYPE_METHOD(t, "setEncoding", SetEncoding);
+    NODE_SET_PROTOTYPE_METHOD(t, "setUnknownEncoding", SetUnknownEncoding);
     NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
     NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
     NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
@@ -72,6 +73,7 @@ protected:
     XML_SetCommentHandler(parser, Comment);
     XML_SetXmlDeclHandler(parser, XmlDecl);
     XML_SetEntityDeclHandler(parser, EntityDecl);
+    XML_SetUnknownEncodingHandler(parser, UnknownEncoding, this);
   }
     
   /*** parse() ***/
@@ -413,6 +415,58 @@ private:
                                     : NanNewLocal<Value>(Null())
     };
     parser->Emit(8, argv);
+  }
+
+  XML_Encoding *xmlEncodingInfo;
+
+  static int UnknownEncoding(void *encodingHandlerData, const XML_Char *name, XML_Encoding *info)
+  {
+    NanScope();
+    Parser *parser = reinterpret_cast<Parser *>(encodingHandlerData);
+
+    /* Trigger event */
+    parser->xmlEncodingInfo = info;
+    Handle<Value> argv[2] = { NanSymbol("unknownEncoding"),
+                              name ? NanNewLocal<Value>(String::New(name))
+                                   : NanNewLocal<Value>(Null())
+    };
+    parser->Emit(2, argv);
+
+    /* Did no event handler invoke setUnknownEncoding()? */
+    if (parser->xmlEncodingInfo) {
+      parser->xmlEncodingInfo = NULL;
+      return XML_STATUS_ERROR;
+    } else {
+      return XML_STATUS_OK;
+    }
+  }
+
+  /**
+   * Fills xmlEncodingInfo
+   */
+  static NAN_METHOD(SetUnknownEncoding)
+  {
+    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    NanScope();
+
+    if (!parser->xmlEncodingInfo)
+      NanThrowError("setUnknownEncoding() must be synchronously invoked from an unknownEncoding event handler");
+
+    if (args.Length() >= 1 && args[0]->IsArray()) {
+      Local<Array> map = args[0].As<Array>();
+      /* Copy map */
+      for(int i = 0; i < 256; i++) {
+        Local<Value> m = map->Get(Integer::New(i));
+        if (m->IsInt32())
+          parser->xmlEncodingInfo->map[i] = m->Int32Value();
+        else
+          NanThrowTypeError("UnknownEncoding map must consist of 256 ints");
+      }
+    } else
+      NanThrowTypeError("SetUnknownEncoding expects a map array");
+
+    parser->xmlEncodingInfo = NULL;
+    NanReturnUndefined();
   }
 
   void Emit(int argc, Handle<Value> argv[])
