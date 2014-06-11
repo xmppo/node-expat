@@ -382,12 +382,12 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Local<Value> argv[4] = { NanSymbol("xmlDecl"),
-                              version ? NanNewLocal<Value>(String::New(version))
-                                      : NanNewLocal<Value>(Null()),
-                              encoding ? NanNewLocal<Value>(String::New(encoding))
-                                      : NanNewLocal<Value>(Null()),
-                              NanNewLocal<Value>(Boolean::New(standalone)) };
+    Local<Value> argv[4] = { NanNew<String>("xmlDecl"),
+                              version ? NanNew<Value>(String::NewSymbol(version))
+                                      : NanNew<Value>(NanNull()),
+                              encoding ? NanNew<Value>(String::NewSymbol(encoding))
+                                      : NanNew<Value>(NanNull()),
+                              standalone ? NanNew<Value>(NanTrue()) : NanNew<Value>(NanFalse()) };
     parser->Emit(4, argv);
   }
 
@@ -399,20 +399,20 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Local<Value> argv[8] = { NanSymbol("entityDecl"),
-                              entityName ? NanNewLocal<Value>(String::New(entityName))
-                                    : NanNewLocal<Value>(Null()),
-                              NanNewLocal<Value>(Boolean::New(is_parameter_entity)),
-                              value ? NanNewLocal<Value>(String::New(value, value_length))
-                                    : NanNewLocal<Value>(Null()),
-                              base ? NanNewLocal<Value>(String::New(base))
-                                    : NanNewLocal<Value>(Null()),
-                              systemId ? NanNewLocal<Value>(String::New(systemId))
-                                    : NanNewLocal<Value>(Null()),
-                              publicId ? NanNewLocal<Value>(String::New(publicId))
-                                    : NanNewLocal<Value>(Null()),
-                              notationName ? NanNewLocal<Value>(String::New(notationName))
-                                    : NanNewLocal<Value>(Null())
+    Local<Value> argv[8] = { NanNew<String>("entityDecl"),
+                              entityName ? NanNew<Value>(String::NewSymbol(entityName))
+                                    : NanNew<Value>(NanNull()),
+                              is_parameter_entity ? NanNew<Value>(NanTrue()) : NanNew<Value>(NanFalse()),
+                              value ? NanNew<Value>(String::NewSymbol(value, value_length))
+                                    : NanNew<Value>(NanNull()),
+                              base ? NanNew<Value>(String::NewSymbol(base))
+                                    : NanNew<Value>(NanNull()),
+                              systemId ? NanNew<Value>(String::NewSymbol(systemId))
+                                    : NanNew<Value>(NanNull()),
+                              publicId ? NanNew<Value>(String::NewSymbol(publicId))
+                                    : NanNew<Value>(NanNull()),
+                              notationName ? NanNew<Value>(String::NewSymbol(notationName))
+                                    : NanNew<Value>(NanNull())
     };
     parser->Emit(8, argv);
   }
@@ -428,7 +428,7 @@ private:
     parser->xmlEncodingInfo = info;
     Handle<Value> argv[2] = { NanNew<String>("unknownEncoding"),
                               name ? NanNew<Value>(String::New(name))
-                                   : NanNew<Value>(Null())
+                                   : NanNew<Value>(NanNull())
     };
     parser->Emit(2, argv);
 
