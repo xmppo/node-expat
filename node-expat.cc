@@ -39,7 +39,7 @@ protected:
     if (args.Length() == 1 && args[0]->IsString())
       {
         encoding = new XML_Char[32];
-        NanFromV8String(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        NanRawString(args[0], Nan::ASCII, NULL, encoding, 32, 0);
       }
 
     Parser *parser = new Parser(encoding);
@@ -147,7 +147,7 @@ protected:
     if (args.Length() == 1 && args[0]->IsString())
       {
         XML_Char *encoding = new XML_Char[32];
-        NanFromV8String(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        NanRawString(args[0], Nan::ASCII, NULL, encoding, 32, 0);
 
         int status = parser->setEncoding(encoding);
 
@@ -220,7 +220,7 @@ protected:
     if (args.Length() == 1 && args[0]->IsString())
       {
         encoding = new XML_Char[32];
-        NanFromV8String(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        NanRawString(args[0], Nan::ASCII, NULL, encoding, 32, 0);
       }
 
     int status = parser->reset(encoding);
