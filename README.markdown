@@ -1,5 +1,7 @@
 # node-expat 
 
+[![Build Status](https://travis-ci.org/node-xmpp/node-expat.png)](https://travis-ci.org/node-xmpp/node-expat)
+
 ## Motivation 
 
 You use [node.js](http://github.com/ry/node) for speed? You process
@@ -21,4 +23,4 @@ Install node-expat:
 npm test
 ```
 
-[![Build Status](https://travis-ci.org/node-xmpp/node-expat.png)](https://travis-ci.org/node-xmpp/node-expat)
+
