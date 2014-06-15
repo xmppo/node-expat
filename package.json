@@ -15,7 +15,7 @@
     "test": "vows --spec ./test.js"
   },
   "dependencies": {
-    "nan": "~1.0.0"
+    "nan": "~1.2.0"
   },
   "devDependencies": {
     "vows": ">=0.5.12",
