@@ -1,31 +1,33 @@
-var expat = require('../lib/node-expat');
-var Iconv  = require('iconv').Iconv;
-var Buffer = require('buffer').Buffer;
-var vows = require('vows');
-var assert = require('assert');
-var fs = require('fs');
+var expat = require('../lib/node-expat')
+  , Iconv  = require('iconv').Iconv
+  , Buffer = require('buffer').Buffer
+  , vows = require('vows')
+  , assert = require('assert')
+  , fs = require('fs')
+  , log = require('debug')('test/index')
 
 function collapseTexts(evs) {
-    var r = [];
-    var t = "";
+    var r = []
+    var t = ''
     evs.forEach(function(ev) {
-	if (ev[0] == 'text')
-	    t += ev[1];
-	else {
-	    if (t != "")
-		r.push(['text', t]);
-	    t = "";
-	    r.push(ev);
-	}
-    });
-    if (t != "")
-	r.push(['text', t]);
-    return r;
+        if (ev[0] == 'text') {
+            t += ev[1]
+        } else {
+            if (t != '')
+            r.push([ 'text', t ])
+            t = ''
+            r.push(ev)
+        }
+    })
+    if (t != '') {
+	    r.push([ 'text', t ])
+    }
+    return r
 }
 
 function expect(s, evs_expected) {
-  for(var step = s.length; step > 0; step--) {
-    expectWithParserAndStep(s, evs_expected, new expat.Parser(), step);
+  for (var step = s.length; step > 0; step--) {
+    expectWithParserAndStep(s, evs_expected, new expat.Parser(), step)
   }
 }
 
@@ -376,17 +378,21 @@ vows.describe('node-expat').addBatch({
                 var p = expat.createParser()
                 this.startTags = 0
                 p.on('startElement', function(name) {
+                    log('startElement', name)
                     this.startTags++
-                }.bind(this));
-                this.endTags = 0;
+                }.bind(this))
+                this.endTags = 0
                 p.on('endElement', function(name) {
+                    log('endElement', name)
                     this.endTags++
-                }.bind(this));
+                }.bind(this))
                 p.on('end', function() {
                     this.ended = true
+                    log('ended')
                 }.bind(this))
                 p.on('close', function() {
                     this.closed = true
+                    log('closed')
                     this.callback()
                 }.bind(this))
                 p.on('error', function(error) {
