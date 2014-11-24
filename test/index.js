@@ -345,67 +345,70 @@ vows.describe('node-expat').addBatch({
     },
     'statistics': {
 	'line number': function() {
-	    var p = new expat.Parser();
-	    assert.equal(p.getCurrentLineNumber(), 1);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentLineNumber(), 2);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentLineNumber(), 3);
+	    var p = new expat.Parser()
+	    assert.equal(p.getCurrentLineNumber(), 1)
+	    p.parse('\n')
+	    assert.equal(p.getCurrentLineNumber(), 2)
+	    p.parse('\n')
+	    assert.equal(p.getCurrentLineNumber(), 3)
 	},
 	'column number': function() {
 	    var p = new expat.Parser();
-	    assert.equal(p.getCurrentColumnNumber(), 0);
-	    p.parse(" ");
-	    assert.equal(p.getCurrentColumnNumber(), 1);
-	    p.parse(" ");
-	    assert.equal(p.getCurrentColumnNumber(), 2);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentColumnNumber(), 0);
+	    assert.equal(p.getCurrentColumnNumber(), 0)
+	    p.parse(' ')
+	    assert.equal(p.getCurrentColumnNumber(), 1)
+	    p.parse(' ')
+	    assert.equal(p.getCurrentColumnNumber(), 2)
+	    p.parse('\n')
+	    assert.equal(p.getCurrentColumnNumber(), 0)
 	},
 	'byte index': function() {
-	    var p = new expat.Parser();
-	    assert.equal(p.getCurrentByteIndex(), -1);
-	    p.parse("");
-	    assert.equal(p.getCurrentByteIndex(), -1);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentByteIndex(), 1);
-	    p.parse(" ");
-	    assert.equal(p.getCurrentByteIndex(), 2);
+	    var p = new expat.Parser()
+	    assert.equal(p.getCurrentByteIndex(), -1)
+	    p.parse('')
+	    assert.equal(p.getCurrentByteIndex(), -1)
+	    p.parse('\n')
+	    assert.equal(p.getCurrentByteIndex(), 1)
+	    p.parse(' ')
+	    assert.equal(p.getCurrentByteIndex(), 2)
 	},
     },
     'Stream interface': {
-	'read file': {
-	    topic: function() {
-		var p = expat.createParser();
-		this.startTags = 0;
-		p.on('startElement', function(name) {
-		    this.startTags++;
-		}.bind(this));
-		this.endTags = 0;
-		p.on('endElement', function(name) {
-		    this.endTags++;
-		}.bind(this));
-		p.on('end', function() {
-		    this.ended = true;
-		}.bind(this));
-		p.on('close', function() {
-		    this.closed = true;
-		    this.callback();
-		}.bind(this));
+        'read file': {
+            topic: function() {
+                var p = expat.createParser()
+                this.startTags = 0
+                p.on('startElement', function(name) {
+                    this.startTags++
+                }.bind(this));
+                this.endTags = 0;
+                p.on('endElement', function(name) {
+                    this.endTags++
+                }.bind(this));
+                p.on('end', function() {
+                    this.ended = true
+                }.bind(this))
+                p.on('close', function() {
+                    this.closed = true
+                    this.callback()
+                }.bind(this))
+                p.on('error', function(error) {
+                    assert.fail('Error', error)
+                }.bind(this))
 
-		var mystic = fs.createReadStream(__dirname + '/test-mystic-library.xml');
-		mystic.pipe(p);
-	    },
-	    'startElement and endElement events': function() {
-		assert.ok(this.startTags > 0, 'startElement events at all');
-		assert.ok(this.startTags == this.endTags, 'equal amount');
-	    },
-	    'end event': function() {
-		assert.ok(this.ended, 'emit end event');
-	    },
-	    'close event': function() {
-		assert.ok(this.closed, 'emit close event');
-	    }
-	}
+                var mystic = fs.createReadStream(__dirname + '/../test-mystic-library.xml')
+                mystic.pipe(p)
+            },
+            'startElement and endElement events': function() {
+                assert.ok(this.startTags > 0, 'startElement events at all')
+                assert.ok(this.startTags == this.endTags, 'equal amount')
+            },
+            'end event': function() {
+                assert.ok(this.ended, 'emit end event')
+            },
+            'close event': function() {
+                assert.ok(this.closed, 'emit close event')
+            }
+        }
     }
-}).export(module);
+}).export(module)
