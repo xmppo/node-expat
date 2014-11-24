@@ -12,7 +12,7 @@
     "parsing"
   ],
   "scripts": {
-    "test": "vows --spec ./test.js"
+    "test": "vows --spec ./test/**/*.js"
   },
   "dependencies": {
     "bindings": "~1.2.1",

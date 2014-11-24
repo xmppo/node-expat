@@ -1,4 +1,4 @@
-var expat = require('./lib/node-expat');
+var expat = require('../lib/node-expat');
 var Iconv  = require('iconv').Iconv;
 var Buffer = require('buffer').Buffer;
 var vows = require('vows');
@@ -329,19 +329,19 @@ vows.describe('node-expat').addBatch({
 		['text', 'foo & bar'],
 		['endElement', 'e']])
     },
-	'parsing twice the same document with the same parser instance should be fine': 'reset() not yet implemented'
-	/*function() {
-	   var p = new expat.Parser("UTF-8");
-           var xml = "<foo>bar</foo>";
-           var result = p.parse(xml);
-           assert.ok(result);
-           assert.isNull(p.getError());
+	'parsing twice the same document with the same parser instance should be fine': 
+	  function() {
+	   var p = new expat.Parser('UTF-8')
+           var xml = '<foo>bar</foo>'
+           var result = p.parse(xml)
+           assert.ok(result)
+           assert.isNull(p.getError())
+           p.reset()
+           var result2 = p.parse(xml)
+           assert.isNull(p.getError())
+           assert.ok(result2)
 
-           var result2 = p.parse(xml);
-           assert.isNull(p.getError());
-           assert.ok(result2);
-
-        }*/
+        }
     },
     'statistics': {
 	'line number': function() {
