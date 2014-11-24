@@ -393,7 +393,7 @@ vows.describe('node-expat').addBatch({
                     assert.fail('Error', error)
                 }.bind(this))
 
-                var mystic = fs.createReadStream(__dirname + '/../test-mystic-library.xml')
+                var mystic = fs.createReadStream(__dirname + '/mystic-library.xml')
                 mystic.pipe(p)
             },
             'startElement and endElement events': function() {
