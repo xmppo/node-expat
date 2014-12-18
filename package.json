@@ -1,6 +1,6 @@
 {
   "name": "node-expat",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "main": "./lib/node-expat",
   "description": "NodeJS binding for fast XML parsing.",
   "keywords": [
