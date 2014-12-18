@@ -25,8 +25,8 @@
     "type": "git",
     "url": "https://github.com/node-xmpp/node-expat.git"
   },
-  "homepage": "http://github.com/node-xmpp/node-expat",
-  "bugs": "http://github.com/node-xmpp/node-expat/issues",
+  "homepage": "http://node-xmpp.github.io/doc/nodeexpat.html",
+  "bugs": "https://github.com/node-xmpp/node-expat/issues",
   "author": {
     "name": "Astro",
     "email": "astro@spaceboyz.net",
