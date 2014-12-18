@@ -11,7 +11,7 @@ public:
   static void Initialize(Handle<Object> target)
   {
     NanScope();
-    Local<FunctionTemplate> t = FunctionTemplate::New(New);
+    Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
 
     t->InstanceTemplate()->SetInternalFieldCount(1);
 
@@ -26,7 +26,7 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "getCurrentColumnNumber", GetCurrentColumnNumber);
     NODE_SET_PROTOTYPE_METHOD(t, "getCurrentByteIndex", GetCurrentByteIndex);
 
-    target->Set(NanNew<String>("Parser"), t->GetFunction());
+    target->Set(NanNew("Parser"), t->GetFunction());
   }
 
 protected:
@@ -95,14 +95,14 @@ protected:
     if (args.Length() >= 1 && args[0]->IsString())
       {
         str = args[0]->ToString();
-        NanReturnValue(parser->parseString(**str, isFinal) ? True() : False());
+        NanReturnValue(parser->parseString(**str, isFinal) ? NanTrue() : NanFalse());
       }
     else if (args.Length() >= 1 && args[0]->IsObject())
       {
         Local<Object> obj = args[0]->ToObject();
         if (Buffer::HasInstance(obj))
         {
-          NanReturnValue(parser->parseBuffer(obj, isFinal) ? True() : False());
+          NanReturnValue(parser->parseBuffer(obj, isFinal) ? NanTrue() : NanFalse());
         }
         else
         {
@@ -153,10 +153,10 @@ protected:
 
         delete[] encoding;
 
-        NanReturnValue(status ? True() : False());
+        NanReturnValue(status ? NanTrue() : NanFalse());
       }
     else
-      NanReturnValue(False());
+      NanReturnValue(NanFalse());
   }
 
   int setEncoding(XML_Char *encoding)
@@ -173,9 +173,9 @@ protected:
 
     const XML_LChar *error = parser->getError();
     if (error)
-      NanReturnValue(String::New(error));
+      NanReturnValue(NanNew(error));
     else
-      NanReturnValue(Null());
+      NanReturnValue(NanNull());
   }
   
   /*** stop() ***/
@@ -187,7 +187,7 @@ protected:
 
     int status = parser->stop();
     
-    NanReturnValue(status ? True() : False());
+    NanReturnValue(status ? NanTrue() : NanFalse());
   }
 
   int stop()
@@ -204,7 +204,7 @@ protected:
 
     int status = parser->resume();
     
-    NanReturnValue(status ? True() : False());
+    NanReturnValue(status ? NanTrue() : NanFalse());
   }
 
   int resume()
@@ -226,7 +226,7 @@ protected:
     int status = parser->reset(encoding);
     if (status) 
       parser->attachHandlers();
-    NanReturnValue(status ? True() : False());
+    NanReturnValue(status ? NanTrue() : NanFalse());
   }
 
   int reset(XML_Char *encoding)
@@ -245,7 +245,7 @@ protected:
     NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
 
-    NanReturnValue(Integer::NewFromUnsigned(parser->getCurrentLineNumber()));
+    NanReturnValue(NanNew(parser->getCurrentLineNumber()));
   }
 
   uint32_t getCurrentLineNumber()
@@ -258,7 +258,7 @@ protected:
     NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
 
-    NanReturnValue(Integer::NewFromUnsigned(parser->getCurrentColumnNumber()));
+    NanReturnValue(NanNew(parser->getCurrentColumnNumber()));
   }
 
   uint32_t getCurrentColumnNumber()
@@ -271,7 +271,7 @@ protected:
     NanScope();
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
 
-    NanReturnValue(Integer::New(parser->getCurrentByteIndex()));
+    NanReturnValue(NanNew(parser->getCurrentByteIndex()));
   }
 
   int32_t getCurrentByteIndex()
@@ -296,13 +296,13 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Collect atts into JS object */
-    Local<Object> attr = Object::New();
+    Local<Object> attr = NanNew<Object>();
     for(const XML_Char **atts1 = atts; *atts1; atts1 += 2)
-      attr->Set(String::New(atts1[0]), String::New(atts1[1]));
+      attr->Set(NanNew(atts1[0]), NanNew(atts1[1]));
 
     /* Trigger event */
-    Handle<Value> argv[3] = { NanNew<String>("startElement"),
-                              String::New(name),
+    Handle<Value> argv[3] = { NanNew("startElement"),
+                              NanNew(name),
                               attr };
     parser->Emit(3, argv);
   }
@@ -314,7 +314,7 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanNew<String>("endElement"), String::New(name) };
+    Handle<Value> argv[2] = { NanNew("endElement"), NanNew(name) };
     parser->Emit(2, argv);
   }
   
@@ -324,7 +324,7 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { NanNew<String>("startCdata") };
+    Handle<Value> argv[1] = { NanNew("startCdata") };
     parser->Emit(1, argv);
   }
 
@@ -334,7 +334,7 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { NanNew<String>("endCdata") };
+    Handle<Value> argv[1] = { NanNew("endCdata") };
     parser->Emit(1, argv);
   }
 
@@ -345,8 +345,8 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanNew<String>("text"),
-                              String::New(s, len) };
+    Handle<Value> argv[2] = { NanNew("text"),
+                              NanNew(s, len) };
     parser->Emit(2, argv);
   }
 
@@ -357,9 +357,9 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[3] = { NanNew<String>("processingInstruction"),
-                              String::New(target),
-                              String::New(data) };
+    Handle<Value> argv[3] = { NanNew("processingInstruction"),
+                              NanNew(target),
+                              NanNew(data) };
     parser->Emit(3, argv);
   }
 
@@ -370,7 +370,7 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanNew<String>("comment"), String::New(data) };
+    Handle<Value> argv[2] = { NanNew("comment"), NanNew(data) };
     parser->Emit(2, argv);
   }
 
@@ -382,12 +382,16 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Local<Value> argv[4] = { NanNew<String>("xmlDecl"),
-                              version ? NanNew<Value>(String::NewSymbol(version))
-                                      : NanNew<Value>(NanNull()),
-                              encoding ? NanNew<Value>(String::NewSymbol(encoding))
-                                      : NanNew<Value>(NanNull()),
-                              standalone ? NanNew<Value>(NanTrue()) : NanNew<Value>(NanFalse()) };
+    Local<Value> argv[4];
+
+                    argv[0] = NanNew("xmlDecl");
+    if (version)    argv[1] = NanNew(version);
+    else            argv[1] = NanNull();
+    if (encoding)   argv[2] = NanNew(encoding);
+    else            argv[2] = NanNull();
+    if (standalone) argv[3] = NanTrue();
+    else            argv[3] = NanFalse();
+
     parser->Emit(4, argv);
   }
 
@@ -399,21 +403,24 @@ private:
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Local<Value> argv[8] = { NanNew<String>("entityDecl"),
-                              entityName ? NanNew<Value>(String::NewSymbol(entityName))
-                                    : NanNew<Value>(NanNull()),
-                              is_parameter_entity ? NanNew<Value>(NanTrue()) : NanNew<Value>(NanFalse()),
-                              value ? NanNew<Value>(String::NewSymbol(value, value_length))
-                                    : NanNew<Value>(NanNull()),
-                              base ? NanNew<Value>(String::NewSymbol(base))
-                                    : NanNew<Value>(NanNull()),
-                              systemId ? NanNew<Value>(String::NewSymbol(systemId))
-                                    : NanNew<Value>(NanNull()),
-                              publicId ? NanNew<Value>(String::NewSymbol(publicId))
-                                    : NanNew<Value>(NanNull()),
-                              notationName ? NanNew<Value>(String::NewSymbol(notationName))
-                                    : NanNew<Value>(NanNull())
-    };
+    Local<Value> argv[8];
+
+                             argv[0] = NanNew("entityDecl");
+    if (entityName)          argv[1] = NanNew(entityName);
+    else                     argv[1] = NanNull();
+    if (is_parameter_entity) argv[2] = NanTrue();
+    else                     argv[2] = NanFalse();
+    if (value)               argv[3] = NanNew(value, value_length);
+    else                     argv[3] = NanNull();
+    if (base)                argv[4] = NanNew(base);
+    else                     argv[4] = NanNull();
+    if (systemId)            argv[5] = NanNew(systemId);
+    else                     argv[5] = NanNull();
+    if (publicId)            argv[6] = NanNew(publicId);
+    else                     argv[6] = NanNull();
+    if (notationName)        argv[7] = NanNew(notationName);
+    else                     argv[7] = NanNull();
+
     parser->Emit(8, argv);
   }
 
@@ -426,10 +433,12 @@ private:
 
     /* Trigger event */
     parser->xmlEncodingInfo = info;
-    Handle<Value> argv[2] = { NanNew<String>("unknownEncoding"),
-                              name ? NanNew<Value>(String::New(name))
-                                   : NanNew<Value>(NanNull())
-    };
+    Local<Value> argv[2];
+
+              argv[0] = NanNew("unknownEncoding");
+    if (name) argv[1] = NanNew(name);
+    else      argv[1] = NanNull();
+
     parser->Emit(2, argv);
 
     /* Did no event handler invoke setUnknownEncoding()? */
@@ -456,7 +465,7 @@ private:
       Local<Array> map = args[0].As<Array>();
       /* Copy map */
       for(int i = 0; i < 256; i++) {
-        Local<Value> m = map->Get(Integer::New(i));
+        Local<Value> m = map->Get(NanNew(i));
         if (m->IsInt32())
           parser->xmlEncodingInfo->map[i] = m->Int32Value();
         else
@@ -474,7 +483,7 @@ private:
     NanScope();
 
     Handle<Object> handle = NanObjectWrapHandle(this);
-    Local<Function> emit = handle->Get(NanNew<String>("emit")).As<Function>();
+    Local<Function> emit = handle->Get(NanNew("emit")).As<Function>();
     emit->Call(handle, argc, argv);
   }
 };

@@ -1,31 +1,33 @@
-var expat = require('./lib/node-expat');
-var Iconv  = require('iconv').Iconv;
-var Buffer = require('buffer').Buffer;
-var vows = require('vows');
-var assert = require('assert');
-var fs = require('fs');
+var expat = require('../lib/node-expat')
+  , Iconv  = require('iconv').Iconv
+  , Buffer = require('buffer').Buffer
+  , vows = require('vows')
+  , assert = require('assert')
+  , fs = require('fs')
+  , log = require('debug')('test/index')
 
 function collapseTexts(evs) {
-    var r = [];
-    var t = "";
+    var r = []
+    var t = ''
     evs.forEach(function(ev) {
-	if (ev[0] == 'text')
-	    t += ev[1];
-	else {
-	    if (t != "")
-		r.push(['text', t]);
-	    t = "";
-	    r.push(ev);
-	}
-    });
-    if (t != "")
-	r.push(['text', t]);
-    return r;
+        if (ev[0] == 'text') {
+            t += ev[1]
+        } else {
+            if (t != '')
+            r.push([ 'text', t ])
+            t = ''
+            r.push(ev)
+        }
+    })
+    if (t != '') {
+	    r.push([ 'text', t ])
+    }
+    return r
 }
 
 function expect(s, evs_expected) {
-  for(var step = s.length; step > 0; step--) {
-    expectWithParserAndStep(s, evs_expected, new expat.Parser(), step);
+  for (var step = s.length; step > 0; step--) {
+    expectWithParserAndStep(s, evs_expected, new expat.Parser(), step)
   }
 }
 
@@ -218,7 +220,7 @@ vows.describe('node-expat').addBatch({
           }
           p.setUnknownEncoding(map);
         });
-        var text = "";
+        var text = '';
         p.addListener('text', function(s) {
           text += s;
         });
@@ -259,148 +261,157 @@ vows.describe('node-expat').addBatch({
   }
     },
     'stop and resume': {
-	topic: function() {
-	    var cb = this.callback;
-	    var p = new expat.Parser("UTF-8");
+        topic: function() {
+            var cb = this.callback;
+            var p = new expat.Parser("UTF-8");
 
-	    var input = '\
-		<wrap> \
-			<short /> \
-			<short></short> \
-			<long /> \
-			<short /> \
-			<long>foo</long> \
-		</wrap>';
+            var input = '\
+            <wrap> \
+                <short /> \
+                <short></short> \
+                <long /> \
+                <short /> \
+                <long>foo</long> \
+            </wrap>';
 
-	    var expected = ['wrap', 'short', 'short', 'long', 'short', 'long'];
-	    var received = [];
+            var expected = ['wrap', 'short', 'short', 'long', 'short', 'long'];
+            var received = [];
 
-	    var tolerance = 10/100;
-	    var expectedRuntime = 1000;
-	    var start = new Date();
+            var tolerance = 10/100;
+            var expectedRuntime = 1000;
+            var start = new Date();
 
-	    p.addListener('startElement', function(name, attrs) {
-		received.push(name);
+            p.addListener('startElement', function(name, attrs) {
+                received.push(name)
 
-		// suspend parser for 1/2 second
-		if(name == 'long') {
-		    p.stop();
+                // suspend parser for 1/2 second
+                if (name == 'long') {
+                    p.stop()
+                    setTimeout(function() {
+                        p.resume()
+                    }, 500)
+                }
+            });
 
-		    setTimeout(function() {
-			p.resume();
-		    }, 500);
-		}
-	    });
+            p.addListener('endElement', function(name) {
+            // finished parsing
+            if(name == 'wrap') {
+                // test elements received (count. naming, order)
+                assert.equal(JSON.stringify(received), JSON.stringify(expected));
 
-	    p.addListener('endElement', function(name) {
-		// finished parsing
-		if(name == 'wrap') {
-		    // test elements received (count. naming, order)
-		    assert.equal(JSON.stringify(received), JSON.stringify(expected));
+                // test timing (+-5%)
+                var now = new Date();
+                var diff = now.getTime() - start.getTime();
+                var max = expectedRuntime + expectedRuntime * tolerance,
+                min = expectedRuntime - expectedRuntime * tolerance;
 
-		    // test timing (+-5%)
-		    var now = new Date();
-		    var diff = now.getTime() - start.getTime();
-		    var max = expectedRuntime + expectedRuntime * tolerance,
-			min = expectedRuntime - expectedRuntime * tolerance;
+                assert.ok(diff < max, 'Runtime within maximum expected time');
+                assert.ok(diff > min, 'Runtime at least minimum expected time');
 
-		    assert.ok(diff < max, 'Runtime within maximum expected time');
-		    assert.ok(diff > min, 'Runtime at least minimum expected time');
+                return cb(true);
+            }
+            });
 
-		    return cb(true);
-		}
-	    });
-
-	    assert.ok(p.parse(input));
-	},
-	'should have worked': function() {
-	    assert.ok(true, 'start & stop works');
-	}
+            assert.ok(p.parse(input));
+        },
+        'should have worked': function() {
+            assert.ok(true, 'start & stop works')
+        }
     },
     'corner cases': {
-	'parse empty string': function() {
-	    var p = new expat.Parser("UTF-8");
-	    p.parse('');
-	    assert.ok(true, "Did not segfault");
-	},
-
-	'parsing twice the same document with the same parser instance should be fine': 'reset() not yet implemented'
-	/*function() {
-	   var p = new expat.Parser("UTF-8");
-           var xml = "<foo>bar</foo>";
-           var result = p.parse(xml);
-           assert.ok(result);
-           assert.isNull(p.getError());
-
-           var result2 = p.parse(xml);
-           assert.isNull(p.getError());
-           assert.ok(result2);
-
-        }*/
+        'parse empty string': function() {
+            var p = new expat.Parser('UTF-8')
+            p.parse('')
+            assert.ok(true, 'Did not segfault')
+        },
+        'Escaping of ampersands': function() {
+            expect('<e>foo &amp; bar</e>',
+            [['startElement', 'e', {}],
+            ['text', 'foo & bar'],
+            ['endElement', 'e']])
+        },
+        'parsing twice the same document with the same parser instance should be fine': function() {
+           var p = new expat.Parser('UTF-8')
+           var xml = '<foo>bar</foo>'
+           var result = p.parse(xml)
+           assert.ok(result)
+           assert.isNull(p.getError())
+           p.reset()
+           var result2 = p.parse(xml)
+           assert.isNull(p.getError())
+           assert.ok(result2)
+        }
     },
     'statistics': {
-	'line number': function() {
-	    var p = new expat.Parser();
-	    assert.equal(p.getCurrentLineNumber(), 1);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentLineNumber(), 2);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentLineNumber(), 3);
-	},
-	'column number': function() {
-	    var p = new expat.Parser();
-	    assert.equal(p.getCurrentColumnNumber(), 0);
-	    p.parse(" ");
-	    assert.equal(p.getCurrentColumnNumber(), 1);
-	    p.parse(" ");
-	    assert.equal(p.getCurrentColumnNumber(), 2);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentColumnNumber(), 0);
-	},
-	'byte index': function() {
-	    var p = new expat.Parser();
-	    assert.equal(p.getCurrentByteIndex(), -1);
-	    p.parse("");
-	    assert.equal(p.getCurrentByteIndex(), -1);
-	    p.parse("\n");
-	    assert.equal(p.getCurrentByteIndex(), 1);
-	    p.parse(" ");
-	    assert.equal(p.getCurrentByteIndex(), 2);
-	},
+        'line number': function() {
+            var p = new expat.Parser()
+            assert.equal(p.getCurrentLineNumber(), 1)
+            p.parse('\n')
+            assert.equal(p.getCurrentLineNumber(), 2)
+            p.parse('\n')
+            assert.equal(p.getCurrentLineNumber(), 3)
+        },
+        'column number': function() {
+            var p = new expat.Parser();
+            assert.equal(p.getCurrentColumnNumber(), 0)
+            p.parse(' ')
+            assert.equal(p.getCurrentColumnNumber(), 1)
+            p.parse(' ')
+            assert.equal(p.getCurrentColumnNumber(), 2)
+            p.parse('\n')
+            assert.equal(p.getCurrentColumnNumber(), 0)
+        },
+        'byte index': function() {
+            var p = new expat.Parser()
+            assert.equal(p.getCurrentByteIndex(), -1)
+            p.parse('')
+            assert.equal(p.getCurrentByteIndex(), -1)
+            p.parse('\n')
+            assert.equal(p.getCurrentByteIndex(), 1)
+            p.parse(' ')
+            assert.equal(p.getCurrentByteIndex(), 2)
+        },
     },
     'Stream interface': {
-	'read file': {
-	    topic: function() {
-		var p = expat.createParser();
-		this.startTags = 0;
-		p.on('startElement', function(name) {
-		    this.startTags++;
-		}.bind(this));
-		this.endTags = 0;
-		p.on('endElement', function(name) {
-		    this.endTags++;
-		}.bind(this));
-		p.on('end', function() {
-		    this.ended = true;
-		}.bind(this));
-		p.on('close', function() {
-		    this.closed = true;
-		    this.callback();
-		}.bind(this));
+        'read file': {
+            topic: function() {
+                var p = expat.createParser()
+                this.startTags = 0
+                p.on('startElement', function(name) {
+                    log('startElement', name)
+                    this.startTags++
+                }.bind(this))
+                this.endTags = 0
+                p.on('endElement', function(name) {
+                    log('endElement', name)
+                    this.endTags++
+                }.bind(this))
+                p.on('end', function() {
+                    this.ended = true
+                    log('ended')
+                }.bind(this))
+                p.on('close', function() {
+                    this.closed = true
+                    log('closed')
+                    this.callback()
+                }.bind(this))
+                p.on('error', function(error) {
+                    assert.fail('Error', error)
+                }.bind(this))
 
-		var mystic = fs.createReadStream(__dirname + '/test-mystic-library.xml');
-		mystic.pipe(p);
-	    },
-	    'startElement and endElement events': function() {
-		assert.ok(this.startTags > 0, 'startElement events at all');
-		assert.ok(this.startTags == this.endTags, 'equal amount');
-	    },
-	    'end event': function() {
-		assert.ok(this.ended, 'emit end event');
-	    },
-	    'close event': function() {
-		assert.ok(this.closed, 'emit close event');
-	    }
-	}
+                var mystic = fs.createReadStream(__dirname + '/mystic-library.xml')
+                mystic.pipe(p)
+            },
+            'startElement and endElement events': function() {
+                assert.ok(this.startTags > 0, 'startElement events at all')
+                assert.ok(this.startTags == this.endTags, 'equal amount')
+            },
+            'end event': function() {
+                assert.ok(this.ended, 'emit end event')
+            },
+            'close event': function() {
+                assert.ok(this.closed, 'emit close event')
+            }
+        }
     }
-}).export(module);
+}).export(module)
