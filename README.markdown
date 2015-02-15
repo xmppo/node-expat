@@ -15,12 +15,13 @@ Please see the [node-expat manual](http://node-xmpp.github.io/doc/nodeexpat.html
 
 Install node-expat:
 
+```
     npm i node-expat
-  
+```
+
 ## Testing
 
 ```
 npm test
 ```
-
 
