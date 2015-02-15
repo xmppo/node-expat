@@ -15,13 +15,13 @@
     "test": "vows --spec ./test/**/*.js"
   },
   "dependencies": {
-    "bindings": "~1.2.1",
+    "bindings": "^1.2.1",
     "debug": "~2.1.0",
-    "nan": "~1.4.1"
+    "iconv": "^2.1.5",
+    "nan": "^1.6.2"
   },
   "devDependencies": {
-    "vows": ">=0.5.12",
-    "iconv": "~2.1.0"
+    "vows": ">=0.5.12"
   },
   "repository": {
     "type": "git",
