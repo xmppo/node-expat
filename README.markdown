@@ -9,7 +9,7 @@ XML streams? Then you want the fastest XML parser: [libexpat](http://expat.sourc
 
 ## Manual
 
-Please see the [node-expat manual](http://node-xmpp.github.io/doc/nodeexpat.html)
+Please see the [node-expat manual](http://node-xmpp.org/doc/expat.html)
 
 ## Install 
 
