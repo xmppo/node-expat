@@ -1,7 +1,7 @@
 {
   "name": "node-expat",
   "version": "2.3.7",
-  "main": "./lib/node-expat",
+  "main": "./lib/node-expat.js",
   "description": "NodeJS binding for fast XML parsing.",
   "keywords": [
     "xml",
@@ -12,16 +12,25 @@
     "parsing"
   ],
   "scripts": {
-    "test": "vows --spec ./test/**/*.js"
+    "test": "vows --spec ./test/**/*.js",
+    "install": "node-pre-gyp install --fallback-to-build"
   },
   "dependencies": {
     "bindings": "~1.2.1",
     "debug": "~2.1.0",
     "iconv": "~2.1.5",
-    "nan": "~1.7.0"
+    "nan": "~1.7.0",
+    "node-pre-gyp": "0.5.x"
   },
   "devDependencies": {
-    "vows": ">=0.5.12"
+    "vows": ">=0.5.12",
+    "aws-sdk": "~2.0.0-rc.15"
+  },
+  "bundledDependencies": ["node-pre-gyp"],
+  "binary": {
+    "module_name": "node_expat",
+    "module_path": "./lib/binding/",
+    "host": "https://node-expat"
   },
   "repository": {
     "type": "git",
