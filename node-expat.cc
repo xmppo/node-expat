@@ -38,8 +38,9 @@ protected:
     XML_Char *encoding = NULL;
     if (args.Length() == 1 && args[0]->IsString())
       {
-        encoding = new XML_Char[32];
-        NanRawString(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        NanAsciiString encodingArg(args[0]);
+        encoding = new XML_Char[encodingArg.length() + 1];
+        strcpy(encoding, *encodingArg);
       }
 
     Parser *parser = new Parser(encoding);
@@ -146,12 +147,8 @@ protected:
 
     if (args.Length() == 1 && args[0]->IsString())
       {
-        XML_Char *encoding = new XML_Char[32];
-        NanRawString(args[0], Nan::ASCII, NULL, encoding, 32, 0);
-
-        int status = parser->setEncoding(encoding);
-
-        delete[] encoding;
+        NanAsciiString encoding(args[0]);
+        int status = parser->setEncoding(*encoding);
 
         NanReturnValue(status ? NanTrue() : NanFalse());
       }
@@ -219,11 +216,14 @@ protected:
     XML_Char *encoding = NULL;
     if (args.Length() == 1 && args[0]->IsString())
       {
-        encoding = new XML_Char[32];
-        NanRawString(args[0], Nan::ASCII, NULL, encoding, 32, 0);
+        NanAsciiString encodingArg(args[0]);
+        encoding = new XML_Char[encodingArg.length() + 1];
+        strcpy(encoding, *encodingArg);
       }
 
     int status = parser->reset(encoding);
+    if (encoding)
+      delete[] encoding;
     if (status) 
       parser->attachHandlers();
     NanReturnValue(status ? NanTrue() : NanFalse());
