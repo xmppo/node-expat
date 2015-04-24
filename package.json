@@ -1,6 +1,6 @@
 {
   "name": "node-expat",
-  "version": "2.3.7",
+  "version": "2.3.7-precomp",
   "main": "./lib/node-expat.js",
   "description": "NodeJS binding for fast XML parsing.",
   "keywords": [
@@ -30,7 +30,7 @@
   "binary": {
     "module_name": "node_expat",
     "module_path": "./lib/binding/",
-    "host": "https://node-expat"
+    "host": "https://github.com/darelf/node-expat/releases/download/v2.3.7-precomp"
   },
   "repository": {
     "type": "git",
