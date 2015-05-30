@@ -1,7 +1,8 @@
-var util = require('util');
+'use strict';
+
 var node_xml = require("node-xml");
 var libxml = require("libxmljs");
-var expat = require('node-expat');
+var expat = require('./');
 var sax = require('sax');
 
 function NodeXmlParser() {
@@ -29,9 +30,9 @@ function ExpatParser() {
     };
 }
 
-//var p = new NodeXmlParser();
-//var p = new LibXmlJsParser();
-//var p = new SaxParser();
+// var p = new NodeXmlParser();
+// var p = new LibXmlJsParser();
+// var p = new SaxParser();
 var p = new ExpatParser();
 p.parse("<r>");
 var nEl = 0;
@@ -44,7 +45,7 @@ d();
 
 var its =[];
 setInterval(function() {
-    util.puts(nEl + " el/s");
+    console.log(nEl + " el/s");
 	its.push(nEl);
     nEl = 0;
 }, 1000);
@@ -55,6 +56,6 @@ process.on('SIGINT', function () {
 		average += v;
 	});
 	average /= its.length;
-	util.puts("Average: " + average + " el/s");
+	console.log("Average: " + average + " el/s");
 	process.exit(0);
 });

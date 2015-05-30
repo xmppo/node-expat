@@ -1,3 +1,5 @@
+'use strict';
+
 var expat = require('../lib/node-expat')
   , Iconv  = require('iconv').Iconv
   , Buffer = require('buffer').Buffer
