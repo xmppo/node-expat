@@ -76,7 +76,7 @@ protected:
     XML_SetEntityDeclHandler(parser, EntityDecl);
     XML_SetUnknownEncodingHandler(parser, UnknownEncoding, this);
   }
-    
+
   /*** parse() ***/
 
   static NAN_METHOD(Parse)
@@ -174,7 +174,7 @@ protected:
     else
       NanReturnValue(NanNull());
   }
-  
+
   /*** stop() ***/
 
   static NAN_METHOD(Stop)
@@ -183,7 +183,7 @@ protected:
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
 
     int status = parser->stop();
-    
+
     NanReturnValue(status ? NanTrue() : NanFalse());
   }
 
@@ -191,7 +191,7 @@ protected:
   {
     return XML_StopParser(parser, XML_TRUE) != 0;
   }
-  
+
   /*** resume() ***/
 
   static NAN_METHOD(Resume)
@@ -200,7 +200,7 @@ protected:
     Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
 
     int status = parser->resume();
-    
+
     NanReturnValue(status ? NanTrue() : NanFalse());
   }
 
@@ -208,7 +208,7 @@ protected:
   {
     return XML_ResumeParser(parser) != 0;
   }
-  
+
   static NAN_METHOD(Reset)
   {
     NanScope();
@@ -224,7 +224,7 @@ protected:
     int status = parser->reset(encoding);
     if (encoding)
       delete[] encoding;
-    if (status) 
+    if (status)
       parser->attachHandlers();
     NanReturnValue(status ? NanTrue() : NanFalse());
   }
@@ -285,7 +285,7 @@ private:
 
   /* no default ctor */
   Parser();
-        
+
   /*** SAX callbacks ***/
   /* Should a local HandleScope be used in those callbacks? */
 
@@ -317,7 +317,7 @@ private:
     Handle<Value> argv[2] = { NanNew("endElement"), NanNew(name) };
     parser->Emit(2, argv);
   }
-  
+
   static void StartCdata(void *userData)
   {
     NanScope();
