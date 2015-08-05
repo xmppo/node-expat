@@ -15,19 +15,16 @@
     "test": "vows --spec ./test/**/*.js"
   },
   "dependencies": {
-    "bindings": "~1.2.1",
-    "debug": "~2.2.0",
-    "iconv": "~2.1.5",
-    "nan": "~1.8.4"
+    "bindings": "^1.2.1",
+    "debug": "^2.2.0",
+    "iconv": "^2.1.5",
+    "nan": "^1.8.4"
   },
   "devDependencies": {
-    "vows": ">=0.5.12"
+    "vows": "^0.8.1"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/node-xmpp/node-expat.git"
-  },
-  "homepage": "http://node-xmpp.github.io/doc/nodeexpat.html",
+  "repository": "github:node-xmpp/node-expat",
+  "homepage": "http://github.com/node-xmpp/node-expat",
   "bugs": "https://github.com/node-xmpp/node-expat/issues",
   "author": {
     "name": "Astro",
@@ -54,13 +51,10 @@
     "Andreas Botsikas",
     "Tom Hughes-Croucher",
     "Nathan Rajlich",
-    "Julien Genestoux"
+    "Julien Genestoux",
+    "Sonny Piers"
   ],
-  "licenses": [
-    {
-      "type": "MIT"
-    }
-  ],
+  "license": "MIT",
   "engines": {
     "node": ">=0.8"
   }
