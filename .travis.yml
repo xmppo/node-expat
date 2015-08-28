@@ -6,7 +6,7 @@ node_js:
   - "0.8"
   - "0.10"
   - "0.12"
-  - "iojs-v2.5.0"
+  - "iojs"
 
 before_install:
   # npm shipped with Node.js 0.8 doesn't support carret so let's update it
