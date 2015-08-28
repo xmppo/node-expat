@@ -6,27 +6,27 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-class Parser : public ObjectWrap {
+class Parser : public Nan::ObjectWrap {
 public:
   static void Initialize(Handle<Object> target)
   {
-    NanScope();
-    Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
+    Nan::HandleScope scope;
+    Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(New);
 
     t->InstanceTemplate()->SetInternalFieldCount(1);
 
-    NODE_SET_PROTOTYPE_METHOD(t, "parse", Parse);
-    NODE_SET_PROTOTYPE_METHOD(t, "setEncoding", SetEncoding);
-    NODE_SET_PROTOTYPE_METHOD(t, "setUnknownEncoding", SetUnknownEncoding);
-    NODE_SET_PROTOTYPE_METHOD(t, "getError", GetError);
-    NODE_SET_PROTOTYPE_METHOD(t, "stop", Stop);
-    NODE_SET_PROTOTYPE_METHOD(t, "resume", Resume);
-    NODE_SET_PROTOTYPE_METHOD(t, "reset", Reset);
-    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentLineNumber", GetCurrentLineNumber);
-    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentColumnNumber", GetCurrentColumnNumber);
-    NODE_SET_PROTOTYPE_METHOD(t, "getCurrentByteIndex", GetCurrentByteIndex);
+    Nan::SetPrototypeMethod(t, "parse", Parse);
+    Nan::SetPrototypeMethod(t, "setEncoding", SetEncoding);
+    Nan::SetPrototypeMethod(t, "setUnknownEncoding", SetUnknownEncoding);
+    Nan::SetPrototypeMethod(t, "getError", GetError);
+    Nan::SetPrototypeMethod(t, "stop", Stop);
+    Nan::SetPrototypeMethod(t, "resume", Resume);
+    Nan::SetPrototypeMethod(t, "reset", Reset);
+    Nan::SetPrototypeMethod(t, "getCurrentLineNumber", GetCurrentLineNumber);
+    Nan::SetPrototypeMethod(t, "getCurrentColumnNumber", GetCurrentColumnNumber);
+    Nan::SetPrototypeMethod(t, "getCurrentByteIndex", GetCurrentByteIndex);
 
-    target->Set(NanNew("Parser"), t->GetFunction());
+    target->Set(Nan::New("Parser").ToLocalChecked(), t->GetFunction());
   }
 
 protected:
@@ -34,11 +34,11 @@ protected:
 
   static NAN_METHOD(New)
   {
-    NanScope();
+    Nan::HandleScope scope;
     XML_Char *encoding = NULL;
-    if (args.Length() == 1 && args[0]->IsString())
+    if (info.Length() == 1 && info[0]->IsString())
       {
-        NanAsciiString encodingArg(args[0]);
+        Nan::Utf8String encodingArg(info[0]);
         encoding = new XML_Char[encodingArg.length() + 1];
         strcpy(encoding, *encodingArg);
       }
@@ -46,12 +46,12 @@ protected:
     Parser *parser = new Parser(encoding);
     if (encoding)
       delete[] encoding;
-    parser->Wrap(args.This());
-    NanReturnValue(args.This());
+    parser->Wrap(info.This());
+    info.GetReturnValue().Set(info.This());
   }
 
   Parser(const XML_Char *encoding)
-    : ObjectWrap()
+    : Nan::ObjectWrap()
   {
     parser = XML_ParserCreate(encoding);
     assert(parser != NULL);
@@ -81,39 +81,39 @@ protected:
 
   static NAN_METHOD(Parse)
   {
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
-    NanScope();
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
+    Nan::HandleScope scope;
     Local<String> str;
     int isFinal = 0;
 
     /* Argument 2: isFinal :: Bool */
-    if (args.Length() >= 2)
+    if (info.Length() >= 2)
       {
-        isFinal = args[1]->IsTrue();
+        isFinal = info[1]->IsTrue();
       }
 
     /* Argument 1: buf :: String or Buffer */
-    if (args.Length() >= 1 && args[0]->IsString())
+    if (info.Length() >= 1 && info[0]->IsString())
       {
-        str = args[0]->ToString();
-        NanReturnValue(parser->parseString(**str, isFinal) ? NanTrue() : NanFalse());
+        str = info[0]->ToString();
+        info.GetReturnValue().Set(parser->parseString(**str, isFinal) ? Nan::True() : Nan::False());
       }
-    else if (args.Length() >= 1 && args[0]->IsObject())
+    else if (info.Length() >= 1 && info[0]->IsObject())
       {
-        Local<Object> obj = args[0]->ToObject();
+        Local<Object> obj = info[0]->ToObject();
         if (Buffer::HasInstance(obj))
         {
-          NanReturnValue(parser->parseBuffer(obj, isFinal) ? NanTrue() : NanFalse());
+          info.GetReturnValue().Set(parser->parseBuffer(obj, isFinal) ? Nan::True() : Nan::False());
         }
         else
         {
-          NanThrowTypeError("Parse buffer must be String or Buffer");
-          NanReturnUndefined();
+          Nan::ThrowTypeError("Parse buffer must be String or Buffer");
+          return;
         }
       }
     else {
-      NanThrowTypeError("Parse buffer must be String or Buffer");
-      NanReturnUndefined();
+      Nan::ThrowTypeError("Parse buffer must be String or Buffer");
+      return;
     }
   }
 
@@ -142,18 +142,18 @@ protected:
 
   static NAN_METHOD(SetEncoding)
   {
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
-    NanScope();
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
+    Nan::HandleScope scope;
 
-    if (args.Length() == 1 && args[0]->IsString())
+    if (info.Length() == 1 && info[0]->IsString())
       {
-        NanAsciiString encoding(args[0]);
+        Nan::Utf8String encoding(info[0]);
         int status = parser->setEncoding(*encoding);
 
-        NanReturnValue(status ? NanTrue() : NanFalse());
+        info.GetReturnValue().Set(status ? Nan::True() : Nan::False());
       }
     else
-      NanReturnValue(NanFalse());
+      info.GetReturnValue().Set(Nan::False());
   }
 
   int setEncoding(XML_Char *encoding)
@@ -165,26 +165,26 @@ protected:
 
   static NAN_METHOD(GetError)
   {
-    NanScope();
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    Nan::HandleScope scope;
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
 
     const XML_LChar *error = parser->getError();
     if (error)
-      NanReturnValue(NanNew(error));
+      info.GetReturnValue().Set(Nan::New(error).ToLocalChecked());
     else
-      NanReturnValue(NanNull());
+      info.GetReturnValue().Set(Nan::Null());
   }
 
   /*** stop() ***/
 
   static NAN_METHOD(Stop)
   {
-    NanScope();
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    Nan::HandleScope scope;
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
 
     int status = parser->stop();
 
-    NanReturnValue(status ? NanTrue() : NanFalse());
+    info.GetReturnValue().Set(status ? Nan::True() : Nan::False());
   }
 
   int stop()
@@ -196,12 +196,12 @@ protected:
 
   static NAN_METHOD(Resume)
   {
-    NanScope();
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    Nan::HandleScope scope;
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
 
     int status = parser->resume();
 
-    NanReturnValue(status ? NanTrue() : NanFalse());
+    info.GetReturnValue().Set(status ? Nan::True() : Nan::False());
   }
 
   int resume()
@@ -211,12 +211,12 @@ protected:
 
   static NAN_METHOD(Reset)
   {
-    NanScope();
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    Nan::HandleScope scope;
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
     XML_Char *encoding = NULL;
-    if (args.Length() == 1 && args[0]->IsString())
+    if (info.Length() == 1 && info[0]->IsString())
       {
-        NanAsciiString encodingArg(args[0]);
+        Nan::Utf8String encodingArg(info[0]);
         encoding = new XML_Char[encodingArg.length() + 1];
         strcpy(encoding, *encodingArg);
       }
@@ -226,7 +226,7 @@ protected:
       delete[] encoding;
     if (status)
       parser->attachHandlers();
-    NanReturnValue(status ? NanTrue() : NanFalse());
+    info.GetReturnValue().Set(status ? Nan::True() : Nan::False());
   }
 
   int reset(XML_Char *encoding)
@@ -242,10 +242,10 @@ protected:
 
   static NAN_METHOD(GetCurrentLineNumber)
   {
-    NanScope();
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    Nan::HandleScope scope;
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
 
-    NanReturnValue(NanNew(parser->getCurrentLineNumber()));
+    info.GetReturnValue().Set(Nan::New(parser->getCurrentLineNumber()));
   }
 
   uint32_t getCurrentLineNumber()
@@ -255,10 +255,10 @@ protected:
 
   static NAN_METHOD(GetCurrentColumnNumber)
   {
-    NanScope();
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    Nan::HandleScope scope;
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
 
-    NanReturnValue(NanNew(parser->getCurrentColumnNumber()));
+    info.GetReturnValue().Set(Nan::New(parser->getCurrentColumnNumber()));
   }
 
   uint32_t getCurrentColumnNumber()
@@ -268,10 +268,10 @@ protected:
 
   static NAN_METHOD(GetCurrentByteIndex)
   {
-    NanScope();
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
+    Nan::HandleScope scope;
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
 
-    NanReturnValue(NanNew(parser->getCurrentByteIndex()));
+    info.GetReturnValue().Set(Nan::New(parser->getCurrentByteIndex()));
   }
 
   int32_t getCurrentByteIndex()
@@ -292,17 +292,17 @@ private:
   static void StartElement(void *userData,
                            const XML_Char *name, const XML_Char **atts)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Collect atts into JS object */
-    Local<Object> attr = NanNew<Object>();
+    Local<Object> attr = Nan::New<Object>();
     for(const XML_Char **atts1 = atts; *atts1; atts1 += 2)
-      attr->Set(NanNew(atts1[0]), NanNew(atts1[1]));
+      attr->Set(Nan::New(atts1[0]).ToLocalChecked(), Nan::New(atts1[1]).ToLocalChecked());
 
     /* Trigger event */
-    Handle<Value> argv[3] = { NanNew("startElement"),
-                              NanNew(name),
+    Handle<Value> argv[3] = { Nan::New("startElement").ToLocalChecked(),
+                              Nan::New(name).ToLocalChecked(),
                               attr };
     parser->Emit(3, argv);
   }
@@ -310,67 +310,67 @@ private:
   static void EndElement(void *userData,
                          const XML_Char *name)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanNew("endElement"), NanNew(name) };
+    Handle<Value> argv[2] = { Nan::New("endElement").ToLocalChecked(), Nan::New(name).ToLocalChecked() };
     parser->Emit(2, argv);
   }
 
   static void StartCdata(void *userData)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { NanNew("startCdata") };
+    Handle<Value> argv[1] = { Nan::New("startCdata").ToLocalChecked() };
     parser->Emit(1, argv);
   }
 
   static void EndCdata(void *userData)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[1] = { NanNew("endCdata") };
+    Handle<Value> argv[1] = { Nan::New("endCdata").ToLocalChecked() };
     parser->Emit(1, argv);
   }
 
   static void Text(void *userData,
                    const XML_Char *s, int len)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanNew("text"),
-                              NanNew(s, len) };
+    Handle<Value> argv[2] = { Nan::New("text").ToLocalChecked(),
+                              Nan::New(s, len).ToLocalChecked() };
     parser->Emit(2, argv);
   }
 
   static void ProcessingInstruction(void *userData,
                                     const XML_Char *target, const XML_Char *data)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[3] = { NanNew("processingInstruction"),
-                              NanNew(target),
-                              NanNew(data) };
+    Handle<Value> argv[3] = { Nan::New("processingInstruction").ToLocalChecked(),
+                              Nan::New(target).ToLocalChecked(),
+                              Nan::New(data).ToLocalChecked() };
     parser->Emit(3, argv);
   }
 
   static void Comment(void *userData,
                       const XML_Char *data)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
-    Handle<Value> argv[2] = { NanNew("comment"), NanNew(data) };
+    Handle<Value> argv[2] = { Nan::New("comment").ToLocalChecked(), Nan::New(data).ToLocalChecked() };
     parser->Emit(2, argv);
   }
 
@@ -378,19 +378,19 @@ private:
                       const XML_Char *version, const XML_Char *encoding,
                       int standalone)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
     Local<Value> argv[4];
 
-                    argv[0] = NanNew("xmlDecl");
-    if (version)    argv[1] = NanNew(version);
-    else            argv[1] = NanNull();
-    if (encoding)   argv[2] = NanNew(encoding);
-    else            argv[2] = NanNull();
-    if (standalone) argv[3] = NanTrue();
-    else            argv[3] = NanFalse();
+                    argv[0] = Nan::New("xmlDecl").ToLocalChecked();
+    if (version)    argv[1] = Nan::New(version).ToLocalChecked();
+    else            argv[1] = Nan::Null();
+    if (encoding)   argv[2] = Nan::New(encoding).ToLocalChecked();
+    else            argv[2] = Nan::Null();
+    if (standalone) argv[3] = Nan::True();
+    else            argv[3] = Nan::False();
 
     parser->Emit(4, argv);
   }
@@ -399,27 +399,27 @@ private:
                          const XML_Char *value, int value_length, const XML_Char *base,
                          const XML_Char *systemId, const XML_Char *publicId, const XML_Char *notationName)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(userData);
 
     /* Trigger event */
     Local<Value> argv[8];
 
-                             argv[0] = NanNew("entityDecl");
-    if (entityName)          argv[1] = NanNew(entityName);
-    else                     argv[1] = NanNull();
-    if (is_parameter_entity) argv[2] = NanTrue();
-    else                     argv[2] = NanFalse();
-    if (value)               argv[3] = NanNew(value, value_length);
-    else                     argv[3] = NanNull();
-    if (base)                argv[4] = NanNew(base);
-    else                     argv[4] = NanNull();
-    if (systemId)            argv[5] = NanNew(systemId);
-    else                     argv[5] = NanNull();
-    if (publicId)            argv[6] = NanNew(publicId);
-    else                     argv[6] = NanNull();
-    if (notationName)        argv[7] = NanNew(notationName);
-    else                     argv[7] = NanNull();
+                             argv[0] = Nan::New("entityDecl").ToLocalChecked();
+    if (entityName)          argv[1] = Nan::New(entityName).ToLocalChecked();
+    else                     argv[1] = Nan::Null();
+    if (is_parameter_entity) argv[2] = Nan::True();
+    else                     argv[2] = Nan::False();
+    if (value)               argv[3] = Nan::New(value, value_length).ToLocalChecked();
+    else                     argv[3] = Nan::Null();
+    if (base)                argv[4] = Nan::New(base).ToLocalChecked();
+    else                     argv[4] = Nan::Null();
+    if (systemId)            argv[5] = Nan::New(systemId).ToLocalChecked();
+    else                     argv[5] = Nan::Null();
+    if (publicId)            argv[6] = Nan::New(publicId).ToLocalChecked();
+    else                     argv[6] = Nan::Null();
+    if (notationName)        argv[7] = Nan::New(notationName).ToLocalChecked();
+    else                     argv[7] = Nan::Null();
 
     parser->Emit(8, argv);
   }
@@ -428,16 +428,16 @@ private:
 
   static int UnknownEncoding(void *encodingHandlerData, const XML_Char *name, XML_Encoding *info)
   {
-    NanScope();
+    Nan::HandleScope scope;
     Parser *parser = reinterpret_cast<Parser *>(encodingHandlerData);
 
     /* Trigger event */
     parser->xmlEncodingInfo = info;
     Local<Value> argv[2];
 
-              argv[0] = NanNew("unknownEncoding");
-    if (name) argv[1] = NanNew(name);
-    else      argv[1] = NanNull();
+              argv[0] = Nan::New("unknownEncoding").ToLocalChecked();
+    if (name) argv[1] = Nan::New(name).ToLocalChecked();
+    else      argv[1] = Nan::Null();
 
     parser->Emit(2, argv);
 
@@ -455,35 +455,35 @@ private:
    */
   static NAN_METHOD(SetUnknownEncoding)
   {
-    Parser *parser = ObjectWrap::Unwrap<Parser>(args.This());
-    NanScope();
+    Parser *parser = Nan::ObjectWrap::Unwrap<Parser>(info.This());
+    Nan::HandleScope scope;
 
     if (!parser->xmlEncodingInfo)
-      NanThrowError("setUnknownEncoding() must be synchronously invoked from an unknownEncoding event handler");
+      Nan::ThrowError("setUnknownEncoding() must be synchronously invoked from an unknownEncoding event handler");
 
-    if (args.Length() >= 1 && args[0]->IsArray()) {
-      Local<Array> map = args[0].As<Array>();
+    if (info.Length() >= 1 && info[0]->IsArray()) {
+      Local<Array> map = info[0].As<Array>();
       /* Copy map */
       for(int i = 0; i < 256; i++) {
-        Local<Value> m = map->Get(NanNew(i));
+        Local<Value> m = map->Get(Nan::New(i));
         if (m->IsInt32())
           parser->xmlEncodingInfo->map[i] = m->Int32Value();
         else
-          NanThrowTypeError("UnknownEncoding map must consist of 256 ints");
+          Nan::ThrowTypeError("UnknownEncoding map must consist of 256 ints");
       }
     } else
-      NanThrowTypeError("SetUnknownEncoding expects a map array");
+      Nan::ThrowTypeError("SetUnknownEncoding expects a map array");
 
     parser->xmlEncodingInfo = NULL;
-    NanReturnUndefined();
+    return;
   }
 
   void Emit(int argc, Handle<Value> argv[])
   {
-    NanScope();
+    Nan::HandleScope scope;
 
-    Handle<Object> handle = NanObjectWrapHandle(this);
-    Local<Function> emit = handle->Get(NanNew("emit")).As<Function>();
+    Handle<Object> handle = this->handle();
+    Local<Function> emit = handle->Get(Nan::New("emit").ToLocalChecked()).As<Function>();
     emit->Call(handle, argc, argv);
   }
 };
