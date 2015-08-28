@@ -2,11 +2,24 @@ sudo: false
 
 language: node_js
 
+env:
+  - CXX="g++-4.8"
+
 node_js:
   - "0.8"
   - "0.10"
   - "0.12"
   - "iojs"
+  - "iojs-v2"
+  - "iojs-v1"
+
+addons:
+  sources:
+    - ubuntu-toolchain-r-test
+  apt:
+    packages:
+      - g++-4.8
+      - gcc-4.8
 
 before_install:
   # npm shipped with Node.js 0.8 doesn't support carret so let's update it
