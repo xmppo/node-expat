@@ -1,10 +1,11 @@
 # node-expat
 
-[![Build Status](https://travis-ci.org/node-xmpp/node-expat.png)](https://travis-ci.org/node-xmpp/node-expat)
+[![build status](https://img.shields.io/travis/node-xmpp/node-expat/master.svg?style=flat-square)](https://travis-ci.org/node-xmpp/node-expat/branches)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](http://standardjs.com/)
 
 ## Motivation
 
-You use [node.js](http://github.com/ry/node) for speed? You process
+You use [Node.js](https://nodejs.org) for speed? You process
 XML streams? Then you want the fastest XML parser: [libexpat](http://expat.sourceforge.net/)!
 
 ## Manual
@@ -13,10 +14,8 @@ Please see the [node-expat manual](http://node-xmpp.org/doc/expat.html)
 
 ## Install
 
-Install node-expat:
-
 ```
-    npm i node-expat
+npm install node-expat
 ```
 
 ## Testing

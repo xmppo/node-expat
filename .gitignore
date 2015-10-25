@@ -1,5 +1,7 @@
-.lock-wscript
-node_modules
-build
-*.swp
-npm-debug.log
+build/
+node_modules/
+
+!.editorconfig
+!.gitignore
+!.npmignore
+!.travis.yml

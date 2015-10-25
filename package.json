@@ -12,7 +12,10 @@
     "parsing"
   ],
   "scripts": {
-    "test": "vows --spec ./test/**/*.js"
+    "preversion": "npm test",
+    "lint": "standard",
+    "unit": "vows --spec ./test/**/*.js",
+    "test": "npm run unit && npm run lint"
   },
   "dependencies": {
     "bindings": "^1.2.1",

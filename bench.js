@@ -1,62 +1,61 @@
-'use strict';
+'use strict'
 
-var util = require('util');
-var node_xml = require("node-xml");
-var libxml = require("libxmljs");
-var expat = require('./');
-var sax = require('sax');
+var node_xml = require('node-xml')
+var libxml = require('libxmljs')
+var expat = require('./')
+var sax = require('sax')
 
-function NodeXmlParser() {
-    var parser = new node_xml.SaxParser(function(cb) { });
-    this.parse = function(s) {
-	parser.parseString(s);
-    };
+function NodeXmlParser () { // eslint-disable-line
+  var parser = new node_xml.SaxParser(function (cb) {})
+  this.parse = function (s) {
+    parser.parseString(s)
+  }
 }
-function LibXmlJsParser() {
-    var parser = new libxml.SaxPushParser(function(cb) { });
-    this.parse = function(s) {
-	parser.push(s, false);
-    };
+function LibXmlJsParser () { // eslint-disable-line
+  var parser = new libxml.SaxPushParser(function (cb) {})
+  this.parse = function (s) {
+    parser.push(s, false)
+  }
 }
-function SaxParser() {
-    var parser = sax.parser();
-	this.parse = function(s) {
-	parser.write(s).close();
-	}
+function SaxParser () { // eslint-disable-line
+  var parser = sax.parser()
+  this.parse = function (s) {
+    parser.write(s).close()
+  }
 }
-function ExpatParser() {
-    var parser = new expat.Parser();
-    this.parse = function(s) {
-	parser.parse(s, false);
-    };
+function ExpatParser () {
+  var parser = new expat.Parser()
+  this.parse = function (s) {
+    parser.parse(s, false)
+  }
 }
 
-// var p = new NodeXmlParser();
-// var p = new LibXmlJsParser();
-// var p = new SaxParser();
-var p = new ExpatParser();
-p.parse("<r>");
-var nEl = 0;
-function d() {
-    p.parse("<foo bar='baz'>quux</foo>");
-    nEl++;
-    setTimeout(d, 0);
+// var p = new NodeXmlParser()
+// var p = new LibXmlJsParser()
+// var p = new SaxParser()
+var p = new ExpatParser()
+p.parse('<r>')
+var nEl = 0
+function d () {
+  p.parse("<foo bar='baz'>quux</foo>")
+  nEl++
+  setTimeout(d, 0)
 }
-d();
+d()
 
-var its =[];
-setInterval(function() {
-    console.log(nEl + " el/s");
-	its.push(nEl);
-    nEl = 0;
-}, 1000);
+var its = []
+setInterval(function () {
+  console.log(nEl + ' el/s')
+  its.push(nEl)
+  nEl = 0
+}, 1000)
 
 process.on('SIGINT', function () {
-	var average = 0;
-	its.forEach(function (v){
-		average += v;
-	});
-	average /= its.length;
-	console.log("Average: " + average + " el/s");
-	process.exit(0);
-});
+  var average = 0
+  its.forEach(function (v) {
+    average += v
+  })
+  average /= its.length
+  console.log('Average: ' + average + ' el/s')
+  process.exit(0)
+})
