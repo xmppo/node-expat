@@ -6,13 +6,12 @@ env:
   - CXX="g++-4.8"
 
 node_js:
-  - '0.8'
   - '0.10'
   - '0.12'
-  - 'iojs'
-  - 'iojs-v1'
-  - 'iojs-v2'
   - '4.0'
+  - '4.1'
+  - '4.2'
+  - 'stable'
 
 addons:
   apt:
@@ -22,6 +21,4 @@ addons:
     - g++-4.8
     - gcc-4.8
 
-before_install:
-  # npm shipped with Node.js 0.8 doesn't support carret so let's update it
-  - if [ "$TRAVIS_NODE_VERSION" == "0.8" ]; then npm install -g npm; fi
+before_script: npm install -g standard
