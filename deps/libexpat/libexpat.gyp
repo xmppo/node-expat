@@ -55,6 +55,14 @@
         'PIC',
         'HAVE_EXPAT_CONFIG_H'
       ],
+      'cflags': [
+        '-Wno-missing-field-initializers'
+      ],
+      'xcode_settings': {
+        'OTHER_CFLAGS': [
+          '-Wno-missing-field-initializers'
+        ]
+      },
       'include_dirs': [
         '.',
         'lib',

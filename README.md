@@ -20,7 +20,13 @@ npm install node-expat
 
 ## Testing
 
+If not already available globally, you'll need to install the
+[standard](http://standardjs.com/) code style checker.
+
+```
+npm install standard
+```
+
 ```
 npm test
 ```
-
