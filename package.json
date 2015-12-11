@@ -22,8 +22,13 @@
     "nan": "^2.1.0"
   },
   "devDependencies": {
+    "benchmark": "^1.0.0",
     "debug": "^2.2.0",
     "iconv": "^2.1.10",
+    "libxmljs": "^0.16.1",
+    "ltx": "^2.2.0",
+    "node-xml": "^1.0.2",
+    "sax": "^1.1.4",
     "vows": "^0.8.1"
   },
   "repository": "github:node-xmpp/node-expat",
@@ -57,8 +62,5 @@
     "Julien Genestoux",
     "Sonny Piers"
   ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=0.8"
-  }
+  "license": "MIT"
 }

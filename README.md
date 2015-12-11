@@ -20,13 +20,21 @@ npm install node-expat
 
 ## Testing
 
-If not already available globally, you'll need to install the
-[standard](http://standardjs.com/) code style checker.
-
 ```
-npm install standard
-```
-
-```
+npm install -g standard
 npm test
 ```
+
+## Benchmark
+
+```node benchmark.js```
+
+| module             | ops/sec | native | XML compliant |
+|--------------------|--------:|:------:|:-------------:|
+| sax                |  18,641 | ☐      | ☑             |
+| node-xml           |  49,257 | ☐      | ☑             |
+| libxmljs           |  95,169 | ☑      | ☑             |
+| **node-expat**     | 130,776 | ☑      | ☑             |
+| ltx/lib/parsers/ltx| 172,596 | ☐      | ☐             |
+
+Higher is better. Please note that ltx parser is not entirely XML compliant.
