@@ -22,7 +22,7 @@
     "nan": "^2.1.0"
   },
   "devDependencies": {
-    "benchmark": "^1.0.0",
+    "benchmark": "^2.1.0",
     "debug": "^2.2.0",
     "iconv": "^2.1.10",
     "libxmljs": "^0.16.1",
