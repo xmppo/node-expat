@@ -282,7 +282,7 @@ vows.describe('node-expat').addBatch({
       var expected = ['wrap', 'short', 'short', 'long', 'short', 'long']
       var received = []
 
-      var tolerance = 10 / 100
+      var tolerance = 20 / 100
       var expectedRuntime = 1000
       var start = new Date()
 
@@ -304,7 +304,7 @@ vows.describe('node-expat').addBatch({
           // test elements received (count. naming, order)
           assert.equal(JSON.stringify(received), JSON.stringify(expected))
 
-          // test timing (+-5%)
+          // test timing (+-20%)
           var now = new Date()
           var diff = now.getTime() - start.getTime()
           var max = expectedRuntime + expectedRuntime * tolerance
