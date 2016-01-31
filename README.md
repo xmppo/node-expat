@@ -29,12 +29,12 @@ npm test
 
 ```node benchmark.js```
 
-| module             | ops/sec | native | XML compliant |
-|--------------------|--------:|:------:|:-------------:|
-| sax                |  18,641 | ☐      | ☑             |
-| node-xml           |  49,257 | ☐      | ☑             |
-| libxmljs           |  95,169 | ☑      | ☑             |
-| **node-expat**     | 130,776 | ☑      | ☑             |
-| ltx/lib/parsers/ltx| 172,596 | ☐      | ☐             |
+| module                                                                                | ops/sec | native | XML compliant |
+|---------------------------------------------------------------------------------------|--------:|:------:|:-------------:|
+| [sax-js](https://github.com/isaacs/sax-js)                                            |  18,641 | ☐      | ☑             |
+| [node-xml](https://github.com/dylang/node-xml)                                        |  49,257 | ☐      | ☑             |
+| [libxmljs](https://github.com/polotek/libxmljs)                                       |  95,169 | ☑      | ☑             |
+| **node-expat**                                                                        | 130,776 | ☑      | ☑             |
+| [ltx/lib/parsers/ltx](https://github.com/node-xmpp/ltx/blob/master/lib/parsers/ltx.js)| 172,596 | ☐      | ☐             |
 
-Higher is better. Please note that ltx parser is not entirely XML compliant.
+Higher is better.

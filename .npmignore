@@ -5,4 +5,4 @@ test/
 .npmignore
 .travis.yml
 
-bench.js
+benchmark.js
