@@ -38,3 +38,7 @@ npm test
 | [ltx/lib/parsers/ltx](https://github.com/node-xmpp/ltx/blob/master/lib/parsers/ltx.js)| 172,596 | ☐      | ☐             |
 
 Higher is better.
+
+## Windows 
+
+If you fail to install node-expat as a dependency of node-xmpp, please update node-xmpp as it doesn't use node-expat anymore. Help is welcome as none of the maintenairs are currently interested in Windows support. See https://github.com/node-xmpp/node-expat/issues/132 .
