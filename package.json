@@ -15,20 +15,21 @@
     "preversion": "npm test",
     "lint": "standard",
     "unit": "vows --spec ./test/**/*.js",
-    "test": "npm run unit && npm run lint"
+    "test": "npm run unit && npm run lint",
+    "benchmark": "node ./benchmark.js"
   },
   "dependencies": {
     "bindings": "^1.2.1",
-    "nan": "^2.2.0"
+    "nan": "^2.2.1"
   },
   "devDependencies": {
     "benchmark": "^2.1.0",
     "debug": "^2.2.0",
     "iconv": "^2.1.11",
-    "libxmljs": "^0.17.0",
-    "ltx": "^2.2.0",
+    "libxmljs": "^0.17.1",
+    "ltx": "^2.2.2",
     "node-xml": "^1.0.2",
-    "sax": "^1.1.5",
+    "sax": "^1.2.1",
     "vows": "^0.8.1"
   },
   "repository": "github:node-xmpp/node-expat",

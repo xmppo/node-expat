@@ -27,18 +27,19 @@ npm test
 
 ## Benchmark
 
-```node benchmark.js```
+`npm run benchmark`
 
-| module                                                                                | ops/sec | native | XML compliant |
-|---------------------------------------------------------------------------------------|--------:|:------:|:-------------:|
-| [sax-js](https://github.com/isaacs/sax-js)                                            |  18,641 | ☐      | ☑             |
-| [node-xml](https://github.com/dylang/node-xml)                                        |  49,257 | ☐      | ☑             |
-| [libxmljs](https://github.com/polotek/libxmljs)                                       |  95,169 | ☑      | ☑             |
-| **node-expat**                                                                        | 130,776 | ☑      | ☑             |
-| [ltx/lib/parsers/ltx](https://github.com/node-xmpp/ltx/blob/master/lib/parsers/ltx.js)| 172,596 | ☐      | ☐             |
+| module                                                                                | ops/sec | native | XML compliant | stream         |
+|---------------------------------------------------------------------------------------|--------:|:------:|:-------------:|:--------------:|
+| [sax-js](https://github.com/isaacs/sax-js)                                            |  65,853 | ☐      | ☑             | ☑              |
+| [node-xml](https://github.com/dylang/node-xml)                                        | 106,374 | ☐      | ☑             | ☑              |
+| [libxmljs](https://github.com/polotek/libxmljs)                                       | 194,386 | ☑      | ☑             | ☐              |
+| **node-expat**                                                                        | 222,707 | ☑      | ☑             | ☑              |
+| [ltx/lib/parsers/ltx](https://github.com/node-xmpp/ltx/blob/master/lib/parsers/ltx.js)| 473,628 | ☐      | ☐             | ☑              |
 
 Higher is better.
 
-## Windows 
 
-If you fail to install node-expat as a dependency of node-xmpp, please update node-xmpp as it doesn't use node-expat anymore. Help is welcome as none of the maintenairs are currently interested in Windows support. See https://github.com/node-xmpp/node-expat/issues/132 .
+## Windows
+
+If you fail to install node-expat as a dependency of node-xmpp, please update node-xmpp as it doesn't use node-expat anymore. Help is welcome as none of the maintainers are currently interested in Windows support. See https://github.com/node-xmpp/node-expat/issues/132 .
