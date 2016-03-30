@@ -32,21 +32,14 @@
     "sax": "^1.2.1",
     "vows": "^0.8.1"
   },
-  "repository": "github:node-xmpp/node-expat",
-  "homepage": "http://github.com/node-xmpp/node-expat",
-  "bugs": "https://github.com/node-xmpp/node-expat/issues",
+  "repository": "github:astro/node-expat",
+  "homepage": "http://github.com/astro/node-expat",
+  "bugs": "https://github.com/astro/node-expat/issues",
   "author": {
     "name": "Astro",
     "email": "astro@spaceboyz.net",
     "web": "http://spaceboyz.net/~astro/"
   },
-  "maintainers": [
-    {
-      "name": "Lloyd Watkin",
-      "email": "lloyd@evilprofessor.co.uk",
-      "web": "http://www.evilprofessor.co.uk"
-    }
-  ],
   "contributors": [
     "Stephan Maka",
     "Derek Hammer",
@@ -61,7 +54,8 @@
     "Tom Hughes-Croucher",
     "Nathan Rajlich",
     "Julien Genestoux",
-    "Sonny Piers"
+    "Sonny Piers",
+    "Lloyd Watkin"
   ],
   "license": "MIT"
 }
