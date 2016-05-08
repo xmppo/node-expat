@@ -6,6 +6,7 @@ var Buffer = require('buffer').Buffer
 var vows = require('vows')
 var assert = require('assert')
 var fs = require('fs')
+var path = require('path')
 var log = require('debug')('test/index')
 
 function collapseTexts (evs) {
@@ -28,43 +29,43 @@ function collapseTexts (evs) {
   return r
 }
 
-function expect (s, evs_expected) {
+function expect (s, evsExpected) {
   for (var step = s.length; step > 0; step--) {
-    expectWithParserAndStep(s, evs_expected, new expat.Parser(), step)
+    expectWithParserAndStep(s, evsExpected, new expat.Parser(), step)
   }
 }
 
-function expectWithParserAndStep (s, evs_expected, p, step) {
-  var evs_received = []
+function expectWithParserAndStep (s, evsExpected, p, step) {
+  var evsReceived = []
   p.addListener('startElement', function (name, attrs) {
-    evs_received.push(['startElement', name, attrs])
+    evsReceived.push(['startElement', name, attrs])
   })
   p.addListener('endElement', function (name) {
-    evs_received.push(['endElement', name])
+    evsReceived.push(['endElement', name])
   })
   p.addListener('text', function (s) {
-    evs_received.push(['text', s])
+    evsReceived.push(['text', s])
   })
   p.addListener('processingInstruction', function (target, data) {
-    evs_received.push(['processingInstruction', target, data])
+    evsReceived.push(['processingInstruction', target, data])
   })
   p.addListener('comment', function (s) {
-    evs_received.push(['comment', s])
+    evsReceived.push(['comment', s])
   })
   p.addListener('xmlDecl', function (version, encoding, standalone) {
-    evs_received.push(['xmlDecl', version, encoding, standalone])
+    evsReceived.push(['xmlDecl', version, encoding, standalone])
   })
   p.addListener('startCdata', function () {
-    evs_received.push(['startCdata'])
+    evsReceived.push(['startCdata'])
   })
   p.addListener('endCdata', function () {
-    evs_received.push(['endCdata'])
+    evsReceived.push(['endCdata'])
   })
   p.addListener('entityDecl', function (entityName, isParameterEntity, value, base, systemId, publicId, notationName) {
-    evs_received.push(['entityDecl', entityName, isParameterEntity, value, base, systemId, publicId, notationName])
+    evsReceived.push(['entityDecl', entityName, isParameterEntity, value, base, systemId, publicId, notationName])
   })
   p.addListener('error', function (e) {
-    evs_received.push(['error', e])
+    evsReceived.push(['error', e])
   })
   for (var l = 0; l < s.length; l += step) {
     var end = l + step
@@ -75,8 +76,8 @@ function expectWithParserAndStep (s, evs_expected, p, step) {
     p.write(s.slice(l, end))
   }
 
-  var expected = JSON.stringify(evs_expected)
-  var received = JSON.stringify(collapseTexts(evs_received))
+  var expected = JSON.stringify(evsExpected)
+  var received = JSON.stringify(collapseTexts(evsReceived))
   assert.equal(received, expected)
 }
 
@@ -404,7 +405,7 @@ vows.describe('node-expat').addBatch({
           assert.fail('Error', error)
         })
 
-        var mystic = fs.createReadStream(__dirname + '/mystic-library.xml')
+        var mystic = fs.createReadStream(path.join(__dirname, 'mystic-library.xml'))
         mystic.pipe(p)
       },
       'startElement and endElement events': function () {

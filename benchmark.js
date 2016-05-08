@@ -1,14 +1,14 @@
 'use strict'
 
 var benchmark = require('benchmark')
-var node_xml = require('node-xml')
+var nodeXml = require('node-xml')
 var libxml = require('libxmljs')
 var expat = require('./')
 var sax = require('sax')
 var LtxSaxParser = require('ltx/lib/parsers/ltx')
 
 function NodeXmlParser () {
-  var parser = new node_xml.SaxParser(function (cb) {})
+  var parser = new nodeXml.SaxParser(function (cb) {})
   this.parse = function (s) {
     parser.parseString(s)
   }
