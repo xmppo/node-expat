@@ -56,7 +56,19 @@
     "Nathan Rajlich",
     "Julien Genestoux",
     "Sonny Piers",
-    "Lloyd Watkin"
+    "Lloyd Watkin",
+    "AJ ONeal",
+    "Rod Vagg",
+    "Christoph Hartmann",
+    "Corbin Uselton",
+    "Julian Duque",
+    "Lovell Fuller",
+    "Antonio Bustos"
+  ],
+  "licenses": [
+    {
+      "type": "MIT"
+    }
   ],
   "license": "MIT"
 }
