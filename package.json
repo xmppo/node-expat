@@ -30,6 +30,7 @@
     "ltx": "^2.2.2",
     "node-xml": "^1.0.2",
     "sax": "^1.2.1",
+    "standard": "^7.1.2",
     "vows": "^0.8.1"
   },
   "repository": "github:astro/node-expat",
