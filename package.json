@@ -20,14 +20,14 @@
   },
   "dependencies": {
     "bindings": "^1.2.1",
-    "nan": "^2.2.1"
+    "nan": "^2.3.5"
   },
   "devDependencies": {
     "benchmark": "^2.1.0",
     "debug": "^2.2.0",
-    "iconv": "^2.1.11",
-    "libxmljs": "^0.17.1",
-    "ltx": "^2.2.2",
+    "iconv": "^2.2.0",
+    "libxmljs": "^0.18.0",
+    "ltx": "^2.3.0",
     "node-xml": "^1.0.2",
     "sax": "^1.2.1",
     "standard": "^7.1.2",
