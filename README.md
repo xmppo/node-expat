@@ -55,7 +55,6 @@ Important events emitted by a parser:
 * `#on('comment', function (s) {})`
 * `#on('xmlDecl', function (version, encoding, standalone) {})`
 * `#on('startCdata', function () {})`
-* `#on('startCdata', function () {})`
 * `#on('endCdata', function () {})`
 * `#on('entityDecl', function (entityName, isParameterEntity, value, base, systemId, publicId, notationName) {})`
 * `#on('error', function (e) {})`
