@@ -2,10 +2,16 @@
 
 var benchmark = require('benchmark')
 var nodeXml = require('node-xml')
-var libxml = require('libxmljs')
+var libxml = null
 var expat = require('./')
 var sax = require('sax')
 var LtxSaxParser = require('ltx/lib/parsers/ltx')
+
+try {
+  libxml = require('libxmljs')
+} catch (err) {
+  console.error('Cannot load libxmljs, please install it manually:', err)
+}
 
 function NodeXmlParser () {
   var parser = new nodeXml.SaxParser(function (cb) {})
@@ -46,12 +52,15 @@ function LtxParser () {
 var parsers = [
   SaxParser,
   NodeXmlParser,
-  LibXmlJsParser,
   ExpatParser,
   LtxParser
 ].map(function (Parser) {
   return new Parser()
 })
+
+if (libxml) {
+  parsers.push(new LibXmlJsParser())
+}
 
 var suite = new benchmark.Suite('parse')
 
