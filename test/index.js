@@ -136,7 +136,7 @@ vows.describe('node-expat').addBatch({
           ['endElement', 'r']])
     },
     'from buffer': function () {
-      expect(new Buffer('<foo>bar</foo>'),
+      expect(Buffer.from('<foo>bar</foo>'),
         [['startElement', 'foo', {}],
           ['text', 'bar'],
           ['endElement', 'foo']])
@@ -200,7 +200,7 @@ vows.describe('node-expat').addBatch({
         assert.fail(e)
       })
       p.parse("<?xml version='1.0' encoding='Windows-1252'?><r>")
-      p.parse(new Buffer([165, 128, 36]))
+      p.parse(Buffer.from([165, 128, 36]))
       p.parse('</r>')
       assert.equal(encodingName, 'Windows-1252')
       assert.equal(text, '¥€$')
@@ -217,7 +217,7 @@ vows.describe('node-expat').addBatch({
 
         for (var i = 0; i < 256; i++) {
           try {
-            var d = iconv.convert(new Buffer([i])).toString()
+            var d = iconv.convert(Buffer.from([i])).toString()
           } catch (e) {
             d = '\b'
           }
@@ -233,7 +233,7 @@ vows.describe('node-expat').addBatch({
         assert.fail(e)
       })
       p.parse("<?xml version='1.0' encoding='Windows-1252'?><r>")
-      p.parse(new Buffer([165, 128, 36]))
+      p.parse(Buffer.from([165, 128, 36]))
       p.parse('</r>')
       assert.equal(encodingName, 'Windows-1252')
       assert.equal('¥€$', text)

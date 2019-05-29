@@ -3,6 +3,7 @@
 
    77fea421d361dca90041d0040ecf1dca651167fadf2af79e990e35168d70d933 (2.2.1+)
 */
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
 #define _GNU_SOURCE                     /* syscall prototype */
 
@@ -777,10 +778,13 @@ gather_time_entropy(void)
   return ft.dwHighDateTime ^ ft.dwLowDateTime;
 #else
   struct timeval tv;
-  int gettimeofday_res;
 
-  gettimeofday_res = gettimeofday(&tv, NULL);
-  assert (gettimeofday_res == 0);
+#ifndef NDEBUG
+  int gettimeofday_res =
+#endif
+  gettimeofday(&tv, NULL);
+
+  assert(gettimeofday_res == 0);
 
   /* Microseconds time is <20 bits entropy */
   return tv.tv_usec;
