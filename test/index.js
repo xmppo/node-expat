@@ -1,42 +1,42 @@
 'use strict'
 
-var expat = require('../lib/node-expat')
-var Iconv = require('iconv').Iconv
-var Buffer = require('buffer').Buffer
-var vows = require('vows')
-var assert = require('assert')
-var fs = require('fs')
-var path = require('path')
-var log = require('debug')('test/index')
+const expat = require('../lib/node-expat')
+const Iconv = require('iconv').Iconv
+const Buffer = require('buffer').Buffer
+const vows = require('vows')
+const assert = require('assert')
+const fs = require('fs')
+const path = require('path')
+const log = require('debug')('test/index')
 
 function collapseTexts (evs) {
-  var r = []
-  var t = ''
+  const r = []
+  let t = ''
   evs.forEach(function (ev) {
     if (ev[0] === 'text') {
       t += ev[1]
     } else {
       if (t !== '') {
-        r.push([ 'text', t ])
+        r.push(['text', t])
       }
       t = ''
       r.push(ev)
     }
   })
   if (t !== '') {
-    r.push([ 'text', t ])
+    r.push(['text', t])
   }
   return r
 }
 
 function expect (s, evsExpected) {
-  for (var step = s.length; step > 0; step--) {
+  for (let step = s.length; step > 0; step--) {
     expectWithParserAndStep(s, evsExpected, new expat.Parser(), step)
   }
 }
 
 function expectWithParserAndStep (s, evsExpected, p, step) {
-  var evsReceived = []
+  const evsReceived = []
   p.addListener('startElement', function (name, attrs) {
     evsReceived.push(['startElement', name, attrs])
   })
@@ -67,8 +67,8 @@ function expectWithParserAndStep (s, evsExpected, p, step) {
   p.addListener('error', function (e) {
     evsReceived.push(['error', e])
   })
-  for (var l = 0; l < s.length; l += step) {
-    var end = l + step
+  for (let l = 0; l < s.length; l += step) {
+    let end = l + step
     if (end > s.length) {
       end = s.length
     }
@@ -76,31 +76,31 @@ function expectWithParserAndStep (s, evsExpected, p, step) {
     p.write(s.slice(l, end))
   }
 
-  var expected = JSON.stringify(evsExpected)
-  var received = JSON.stringify(collapseTexts(evsReceived))
+  const expected = JSON.stringify(evsExpected)
+  const received = JSON.stringify(collapseTexts(evsReceived))
   assert.equal(received, expected)
 }
 
 vows.describe('node-expat').addBatch({
   'single element': {
-    'simple': function () {
+    simple: function () {
       expect('<r/>',
         [['startElement', 'r', {}],
           ['endElement', 'r']])
     },
     'single element with attribute': function () {
       expect("<r foo='bar'/>",
-        [['startElement', 'r', {foo: 'bar'}],
+        [['startElement', 'r', { foo: 'bar' }],
           ['endElement', 'r']])
     },
     'single elemeht with differently quoted attributes': function () {
       expect('<r foo=\'bar\' baz="quux" test="tset"/>',
-        [['startElement', 'r', {foo: 'bar', baz: 'quux', test: 'tset'}],
+        [['startElement', 'r', { foo: 'bar', baz: 'quux', test: 'tset' }],
           ['endElement', 'r']])
     },
     'single element with namespaces': function () {
       expect('<r xmlns=\'http://localhost/\' xmlns:x="http://example.com/"></r>',
-        [['startElement', 'r', {xmlns: 'http://localhost/', 'xmlns:x': 'http://example.com/'}],
+        [['startElement', 'r', { xmlns: 'http://localhost/', 'xmlns:x': 'http://example.com/' }],
           ['endElement', 'r']])
     },
     'single element with text content': function () {
@@ -147,10 +147,10 @@ vows.describe('node-expat').addBatch({
       expect('<!DOCTYPE b [<!ELEMENT b (#PCDATA)>' +
       '<!ENTITY l0 "ha"><!ENTITY l1 "&l0;&l0;"><!ENTITY l2 "&l1;&l1;">' +
       ']><b>&l2;</b>',
-        [['entityDecl', 'l0', false, 'ha', null, null, null, null],
-          ['entityDecl', 'l1', false, '&l0;&l0;', null, null, null, null],
-          ['entityDecl', 'l2', false, '&l1;&l1;', null, null, null, null],
-          ['startElement', 'b', {}], ['text', 'hahahaha'], ['endElement', 'b']])
+      [['entityDecl', 'l0', false, 'ha', null, null, null, null],
+        ['entityDecl', 'l1', false, '&l0;&l0;', null, null, null, null],
+        ['entityDecl', 'l2', false, '&l1;&l1;', null, null, null, null],
+        ['startElement', 'b', {}], ['text', 'hahahaha'], ['endElement', 'b']])
     }
   },
   'processing instruction': {
@@ -158,7 +158,7 @@ vows.describe('node-expat').addBatch({
       expect('<?i like xml?>',
         [['processingInstruction', 'i', 'like xml']])
     },
-    'simple': function () {
+    simple: function () {
       expect('<?dragons?>',
         [['processingInstruction', 'dragons', '']])
     },
@@ -171,20 +171,20 @@ vows.describe('node-expat').addBatch({
         [['xmlDecl', '1.0', null, true]])
     }
   },
-  'comment': {
-    'simple': function () {
+  comment: {
+    simple: function () {
       expect('<!-- no comment -->',
         [['comment', ' no comment ']])
     }
   },
   'unknownEncoding with single-byte map': {
     'Windows-1252': function () {
-      var p = new expat.Parser()
-      var encodingName
+      const p = new expat.Parser()
+      let encodingName
       p.addListener('unknownEncoding', function (name) {
         encodingName = name
-        var map = []
-        for (var i = 0; i < 256; i++) {
+        const map = []
+        for (let i = 0; i < 256; i++) {
           map[i] = i
         }
         map[165] = 0x00A5 // ¥
@@ -192,7 +192,7 @@ vows.describe('node-expat').addBatch({
         map[36] = 0x0024 // $
         p.setUnknownEncoding(map)
       })
-      var text = ''
+      let text = ''
       p.addListener('text', function (s) {
         text += s
       })
@@ -208,16 +208,17 @@ vows.describe('node-expat').addBatch({
   },
   'unknownEncoding with single-byte map using iconv': {
     'Windows-1252': function () {
-      var p = new expat.Parser()
-      var encodingName
+      const p = new expat.Parser()
+      let encodingName
       p.addListener('unknownEncoding', function (name) {
         encodingName = name
-        var iconv = new Iconv(encodingName + '//TRANSLIT//IGNORE', 'UTF-8')
-        var map = []
+        const iconv = new Iconv(encodingName + '//TRANSLIT//IGNORE', 'UTF-8')
+        const map = []
 
-        for (var i = 0; i < 256; i++) {
+        let d = null
+        for (let i = 0; i < 256; i++) {
           try {
-            var d = iconv.convert(Buffer.from([i])).toString()
+            d = iconv.convert(Buffer.from([i])).toString()
           } catch (e) {
             d = '\b'
           }
@@ -225,7 +226,7 @@ vows.describe('node-expat').addBatch({
         }
         p.setUnknownEncoding(map)
       })
-      var text = ''
+      let text = ''
       p.addListener('text', function (s) {
         text += s
       })
@@ -239,27 +240,27 @@ vows.describe('node-expat').addBatch({
       assert.equal('¥€$', text)
     }
   },
-  'error': {
+  error: {
     'tag name starting with ampersand': function () {
       expect('<&', [['error', 'not well-formed (invalid token)']])
     }
   },
 
-  'reset': {
+  reset: {
     'complete doc without error': function () {
-      var p = new expat.Parser('UTF-8')
+      const p = new expat.Parser('UTF-8')
       expectWithParserAndStep('<start><first /><second>text</second></start>', [['startElement', 'start', {}], ['startElement', 'first', {}], ['endElement', 'first'], ['startElement', 'second', {}], ['text', 'text'], ['endElement', 'second'], ['endElement', 'start']], p, 1000)
       p.reset()
       expectWithParserAndStep('<restart><third>moretext</third><fourth /></restart>', [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', 'moretext'], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000)
     },
     'incomplete doc without error': function () {
-      var p = new expat.Parser('UTF-8')
+      const p = new expat.Parser('UTF-8')
       expectWithParserAndStep('<start><first /><second>text</second>', [['startElement', 'start', {}], ['startElement', 'first', {}], ['endElement', 'first'], ['startElement', 'second', {}], ['text', 'text'], ['endElement', 'second']], p, 1000)
       p.reset()
       expectWithParserAndStep('<restart><third>moretext</third><fourth /></restart>', [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', 'moretext'], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000)
     },
     'with doc error': function () {
-      var p = new expat.Parser('UTF-8')
+      const p = new expat.Parser('UTF-8')
       expectWithParserAndStep('</end>', [['error', 'not well-formed (invalid token)']], p, 1000)
       p.reset()
       expectWithParserAndStep('<restart><third>moretext</third><fourth /></restart>', [['startElement', 'restart', {}], ['startElement', 'third', {}], ['text', 'moretext'], ['endElement', 'third'], ['startElement', 'fourth', {}], ['endElement', 'fourth'], ['endElement', 'restart']], p, 1000)
@@ -267,10 +268,10 @@ vows.describe('node-expat').addBatch({
   },
   'stop and resume': {
     topic: function () {
-      var cb = this.callback
-      var p = new expat.Parser('UTF-8')
+      const onDone = this.callback
+      const p = new expat.Parser('UTF-8')
 
-      var input = [
+      const input = [
         '<wrap>',
         '<short />',
         '<short></short>',
@@ -280,12 +281,12 @@ vows.describe('node-expat').addBatch({
         '</wrap>'
       ].join('')
 
-      var expected = ['wrap', 'short', 'short', 'long', 'short', 'long']
-      var received = []
+      const expected = ['wrap', 'short', 'short', 'long', 'short', 'long']
+      const received = []
 
-      var tolerance = 20 / 100
-      var expectedRuntime = 1000
-      var start = new Date()
+      const tolerance = 20 / 100
+      const expectedRuntime = 1000
+      const start = new Date()
 
       p.addListener('startElement', function (name, attrs) {
         received.push(name)
@@ -306,15 +307,15 @@ vows.describe('node-expat').addBatch({
           assert.equal(JSON.stringify(received), JSON.stringify(expected))
 
           // test timing (+-20%)
-          var now = new Date()
-          var diff = now.getTime() - start.getTime()
-          var max = expectedRuntime + expectedRuntime * tolerance
-          var min = expectedRuntime - expectedRuntime * tolerance
+          const now = new Date()
+          const diff = now.getTime() - start.getTime()
+          const max = expectedRuntime + expectedRuntime * tolerance
+          const min = expectedRuntime - expectedRuntime * tolerance
 
           assert.ok(diff < max, 'Runtime within maximum expected time')
           assert.ok(diff > min, 'Runtime at least minimum expected time')
 
-          return cb(true)
+          return onDone(true)
         }
       })
 
@@ -326,7 +327,7 @@ vows.describe('node-expat').addBatch({
   },
   'corner cases': {
     'parse empty string': function () {
-      var p = new expat.Parser('UTF-8')
+      const p = new expat.Parser('UTF-8')
       p.parse('')
       assert.ok(true, 'Did not segfault')
     },
@@ -337,20 +338,20 @@ vows.describe('node-expat').addBatch({
           ['endElement', 'e']])
     },
     'parsing twice the same document with the same parser instance should be fine': function () {
-      var p = new expat.Parser('UTF-8')
-      var xml = '<foo>bar</foo>'
-      var result = p.parse(xml)
+      const p = new expat.Parser('UTF-8')
+      const xml = '<foo>bar</foo>'
+      const result = p.parse(xml)
       assert.ok(result)
       assert.isNull(p.getError())
       p.reset()
-      var result2 = p.parse(xml)
+      const result2 = p.parse(xml)
       assert.isNull(p.getError())
       assert.ok(result2)
     }
   },
-  'statistics': {
+  statistics: {
     'line number': function () {
-      var p = new expat.Parser()
+      const p = new expat.Parser()
       assert.equal(p.getCurrentLineNumber(), 1)
       p.parse('\n')
       assert.equal(p.getCurrentLineNumber(), 2)
@@ -358,7 +359,7 @@ vows.describe('node-expat').addBatch({
       assert.equal(p.getCurrentLineNumber(), 3)
     },
     'column number': function () {
-      var p = new expat.Parser()
+      const p = new expat.Parser()
       assert.equal(p.getCurrentColumnNumber(), 0)
       p.parse(' ')
       assert.equal(p.getCurrentColumnNumber(), 1)
@@ -368,7 +369,7 @@ vows.describe('node-expat').addBatch({
       assert.equal(p.getCurrentColumnNumber(), 0)
     },
     'byte index': function () {
-      var p = new expat.Parser()
+      const p = new expat.Parser()
       assert.equal(p.getCurrentByteIndex(), -1)
       p.parse('')
       assert.equal(p.getCurrentByteIndex(), -1)
@@ -381,7 +382,7 @@ vows.describe('node-expat').addBatch({
   'Stream interface': {
     'read file': {
       topic: function () {
-        var p = expat.createParser()
+        const p = expat.createParser()
         this.startTags = 0
         p.on('startElement', function (name) {
           log('startElement', name)
@@ -405,7 +406,7 @@ vows.describe('node-expat').addBatch({
           assert.fail('Error', error)
         })
 
-        var mystic = fs.createReadStream(path.join(__dirname, 'mystic-library.xml'))
+        const mystic = fs.createReadStream(path.join(__dirname, 'mystic-library.xml'))
         mystic.pipe(p)
       },
       'startElement and endElement events': function () {

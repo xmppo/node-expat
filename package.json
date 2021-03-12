@@ -24,12 +24,12 @@
   },
   "devDependencies": {
     "benchmark": "^2.1.0",
-    "debug": "^2.2.0",
-    "iconv": "^2.2.0",
+    "debug": "^4.3.1",
+    "iconv": "^3.0.0",
     "ltx": "^2.3.0",
     "node-xml": "^1.0.2",
     "sax": "^1.2.1",
-    "standard": "^7.1.2",
+    "standard": "^16.0.3",
     "vows": "^0.8.1"
   },
   "repository": "github:astro/node-expat",
