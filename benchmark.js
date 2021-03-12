@@ -1,11 +1,11 @@
 'use strict'
 
-var benchmark = require('benchmark')
-var nodeXml = require('node-xml')
-var libxml = null
-var expat = require('./')
-var sax = require('sax')
-var LtxSaxParser = require('ltx/lib/parsers/ltx')
+const benchmark = require('benchmark')
+const nodeXml = require('node-xml')
+let libxml = null
+const expat = require('./')
+const sax = require('sax')
+const LtxSaxParser = require('ltx/lib/parsers/ltx')
 
 try {
   libxml = require('libxmljs')
@@ -14,42 +14,42 @@ try {
 }
 
 function NodeXmlParser () {
-  var parser = new nodeXml.SaxParser(function (cb) {})
+  const parser = new nodeXml.SaxParser(function (cb) {})
   this.parse = function (s) {
     parser.parseString(s)
   }
   this.name = 'node-xml'
 }
 function LibXmlJsParser () {
-  var parser = new libxml.SaxPushParser(function (cb) {})
+  const parser = new libxml.SaxPushParser(function (cb) {})
   this.parse = function (s) {
     parser.push(s, false)
   }
   this.name = 'libxmljs'
 }
 function SaxParser () {
-  var parser = sax.parser()
+  const parser = sax.parser()
   this.parse = function (s) {
     parser.write(s).close()
   }
   this.name = 'sax'
 }
 function ExpatParser () {
-  var parser = new expat.Parser()
+  const parser = new expat.Parser()
   this.parse = function (s) {
     parser.parse(s, false)
   }
   this.name = 'node-expat'
 }
 function LtxParser () {
-  var parser = new LtxSaxParser()
+  const parser = new LtxSaxParser()
   this.parse = function (s) {
     parser.write(s)
   }
   this.name = 'ltx'
 }
 
-var parsers = [
+const parsers = [
   SaxParser,
   NodeXmlParser,
   ExpatParser,
@@ -62,7 +62,7 @@ if (libxml) {
   parsers.push(new LibXmlJsParser())
 }
 
-var suite = new benchmark.Suite('parse')
+const suite = new benchmark.Suite('parse')
 
 parsers.forEach(function (parser) {
   parser.parse('<r>')
@@ -77,4 +77,4 @@ suite.on('cycle', function (event) {
   .on('complete', function () {
     console.log('Fastest is ' + this.filter('fastest').map('name'))
   })
-  .run({'async': true})
+  .run({ async: true })
