@@ -1,6 +1,6 @@
 sudo: false
 
-dist: trusty
+dist: focal
 
 language: node_js
 
