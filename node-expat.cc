@@ -494,7 +494,9 @@ extern "C" {
   {
     Parser::Initialize(target);
   }
-  //Changed the name cause I couldn't load the module with - in their names
-  NODE_MODULE(node_expat, InitAll);
+  // Make init context aware
+  NODE_MODULE_INIT() {
+    InitAll(exports);
+  }
 };
 
