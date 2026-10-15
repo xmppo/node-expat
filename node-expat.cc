@@ -465,7 +465,9 @@ private:
       Local<Array> map = info[0].As<Array>();
       /* Copy map */
       for(int i = 0; i < 256; i++) {
-        Local<Value> m = Nan::Get(map, Nan::New(i)).ToLocalChecked();
+        Local<Value> m;
+        if (!Nan::Get(map, Nan::New(i)).ToLocal(&m))
+          return;
         if (m->IsInt32())
           parser->xmlEncodingInfo->map[i] = Nan::To<int32_t>(m).FromJust();
         else
@@ -483,8 +485,10 @@ private:
     Nan::HandleScope scope;
 
     Local<Object> handle = this->handle();
-    Local<Function> emit = Nan::Get(handle, Nan::New("emit").ToLocalChecked()).ToLocalChecked().As<Function>();
-    Nan::Callback emitCallback(emit);
+    Local<Value> emit;
+    if (!Nan::Get(handle, Nan::New("emit").ToLocalChecked()).ToLocal(&emit))
+      return;
+    Nan::Callback emitCallback(emit.As<Function>());
     Nan::Call(emitCallback, argc, argv);
   }
 };
