@@ -1,7 +1,51 @@
-/* Copyright (c) 1998, 1999 Thai Open Source Software Center Ltd
-   See the file COPYING for copying permission.
+/*
+                            __  __            _
+                         ___\ \/ /_ __   __ _| |_
+                        / _ \\  /| '_ \ / _` | __|
+                       |  __//  \| |_) | (_| | |_
+                        \___/_/\_\ .__/ \__,_|\__|
+                                 |_| XML parser
+
+   Copyright (c) 1997-2000 Thai Open Source Software Center Ltd
+   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
+   Copyright (c) 2002-2003 Fred L. Drake, Jr. <fdrake@users.sourceforge.net>
+   Copyright (c) 2004-2006 Karl Waclawek <karl@waclawek.net>
+   Copyright (c) 2005-2007 Steven Solie <steven@solie.ca>
+   Copyright (c) 2016-2026 Sebastian Pipping <sebastian@pipping.org>
+   Copyright (c) 2017      Rhodri James <rhodri@wildebeest.org.uk>
+   Copyright (c) 2019      David Loffredo <loffredo@steptools.com>
+   Copyright (c) 2021      Donghee Na <donghee.na@python.org>
+   Copyright (c) 2024      Hanno Böck <hanno@gentoo.org>
+   Copyright (c) 2025      Alfonso Gregory <gfunni234@gmail.com>
+   Copyright (c) 2026      Matthew Fernandez <matthew.fernandez@gmail.com>
+   Copyright (c) 2026      Kartik Kenchi <netliomax25@gmail.com>
+   Licensed under the MIT license:
+
+   Permission is  hereby granted,  free of charge,  to any  person obtaining
+   a  copy  of  this  software   and  associated  documentation  files  (the
+   "Software"),  to  deal in  the  Software  without restriction,  including
+   without  limitation the  rights  to use,  copy,  modify, merge,  publish,
+   distribute, sublicense, and/or sell copies of the Software, and to permit
+   persons  to whom  the Software  is  furnished to  do so,  subject to  the
+   following conditions:
+
+   The above copyright  notice and this permission notice  shall be included
+   in all copies or substantial portions of the Software.
+
+   THE  SOFTWARE  IS  PROVIDED  "AS  IS",  WITHOUT  WARRANTY  OF  ANY  KIND,
+   EXPRESS  OR IMPLIED,  INCLUDING  BUT  NOT LIMITED  TO  THE WARRANTIES  OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+   NO EVENT SHALL THE AUTHORS OR  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+   DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   SPDX-License-Identifier: MIT
 */
 
+#include "expat_config.h"
+
+#include <inttypes.h> // PRIu64
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -9,83 +53,77 @@
 #include <fcntl.h>
 
 #ifdef _WIN32
-#include "winconfig.h"
-#elif defined(HAVE_EXPAT_CONFIG_H)
-#include <expat_config.h>
-#endif /* ndef _WIN32 */
+#  include "winconfig.h"
+#endif
 
 #include "expat.h"
-#include "internal.h"  /* for UNUSED_P only */
+#include "internal.h" /* for UNUSED_P only */
 #include "xmlfile.h"
 #include "xmltchar.h"
 #include "filemap.h"
 
+/* Function "read": */
 #if defined(_MSC_VER)
-#include <io.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <io.h>
+/* https://msdn.microsoft.com/en-us/library/wyssk1bs(v=vs.100).aspx */
+#  define EXPAT_read _read
+#  define EXPAT_read_count_t int
+#  define EXPAT_read_req_t unsigned int
+#else /* POSIX */
+#  include <unistd.h>
+/* https://pubs.opengroup.org/onlinepubs/009695399/functions/read.html */
+#  define EXPAT_read read
+#  define EXPAT_read_count_t ssize_t
+#  define EXPAT_read_req_t size_t
 #endif
 
 #ifndef O_BINARY
-#ifdef _O_BINARY
-#define O_BINARY _O_BINARY
-#else
-#define O_BINARY 0
-#endif
-#endif
-
-#ifdef _DEBUG
-#define READ_SIZE 16
-#else
-#define READ_SIZE (1024*8)
+#  ifdef _O_BINARY
+#    define O_BINARY _O_BINARY
+#  else
+#    define O_BINARY 0
+#  endif
 #endif
 
+int g_read_size_bytes = 1024 * 8;
 
 typedef struct {
   XML_Parser parser;
   int *retPtr;
 } PROCESS_ARGS;
 
-static int
-processStream(const XML_Char *filename, XML_Parser parser);
+static int processStream(const XML_Char *filename, XML_Parser parser);
 
 static void
-reportError(XML_Parser parser, const XML_Char *filename)
-{
+reportError(XML_Parser parser, const XML_Char *filename) {
   enum XML_Error code = XML_GetErrorCode(parser);
   const XML_Char *message = XML_ErrorString(code);
   if (message)
-    ftprintf(stdout, T("%s:%" XML_FMT_INT_MOD "u:%" XML_FMT_INT_MOD "u: %s\n"),
-             filename,
-             XML_GetErrorLineNumber(parser),
-             XML_GetErrorColumnNumber(parser),
-             message);
+    ftprintf(stdout, T("%s") T(":%") T(PRIu64) T(":%") T(PRIu64) T(": %s\n"),
+             filename, XML_GetCurrentLineNumber64(parser),
+             XML_GetCurrentColumnNumber64(parser), message);
   else
-    ftprintf(stderr, T("%s: (unknown message %d)\n"), filename, code);
+    ftprintf(stderr, T("%s: (unknown message %u)\n"), filename,
+             (unsigned int)code);
 }
- 
+
 /* This implementation will give problems on files larger than INT_MAX. */
 static void
-processFile(const void *data, size_t size,
-            const XML_Char *filename, void *args)
-{
+processFile(const void *data, size_t size, const XML_Char *filename,
+            void *args) {
   XML_Parser parser = ((PROCESS_ARGS *)args)->parser;
   int *retPtr = ((PROCESS_ARGS *)args)->retPtr;
   if (XML_Parse(parser, (const char *)data, (int)size, 1) == XML_STATUS_ERROR) {
     reportError(parser, filename);
     *retPtr = 0;
-  }
-  else
+  } else
     *retPtr = 1;
 }
 
 #if defined(_WIN32)
 
 static int
-isAsciiLetter(XML_Char c)
-{
+isAsciiLetter(XML_Char c) {
   return (T('a') <= c && c <= T('z')) || (T('A') <= c && c <= T('Z'));
 }
 
@@ -93,21 +131,33 @@ isAsciiLetter(XML_Char c)
 
 static const XML_Char *
 resolveSystemId(const XML_Char *base, const XML_Char *systemId,
-                XML_Char **toFree)
-{
+                XML_Char **toFree) {
   XML_Char *s;
   *toFree = 0;
-  if (!base
-      || *systemId == T('/')
+  if (! base || *systemId == T('/')
 #if defined(_WIN32)
       || *systemId == T('\\')
       || (isAsciiLetter(systemId[0]) && systemId[1] == T(':'))
 #endif
-     )
+  )
     return systemId;
-  *toFree = (XML_Char *)malloc((tcslen(base) + tcslen(systemId) + 2)
-                               * sizeof(XML_Char));
-  if (!*toFree)
+
+  const size_t baseLen = tcslen(base);
+  const size_t systemIdLen = tcslen(systemId);
+
+  /* Detect and prevent integer overflow in the addition (without risking
+     underflow) */
+  if (baseLen > SIZE_MAX - systemIdLen || baseLen > SIZE_MAX - systemIdLen - 2)
+    return systemId;
+
+  const size_t charsRequired = baseLen + systemIdLen + 2;
+
+  /* Detect and prevent integer overflow in the multiplication */
+  if (charsRequired > SIZE_MAX / sizeof(XML_Char))
+    return systemId;
+
+  *toFree = malloc(charsRequired * sizeof(XML_Char));
+  if (! *toFree)
     return systemId;
   tcscpy(*toFree, base);
   s = *toFree;
@@ -122,18 +172,16 @@ resolveSystemId(const XML_Char *base, const XML_Char *systemId,
 }
 
 static int
-externalEntityRefFilemap(XML_Parser parser,
-                         const XML_Char *context,
-                         const XML_Char *base,
-                         const XML_Char *systemId,
-                         const XML_Char *UNUSED_P(publicId))
-{
+externalEntityRefFilemap(XML_Parser parser, const XML_Char *context,
+                         const XML_Char *base, const XML_Char *systemId,
+                         const XML_Char *publicId) {
   int result;
   XML_Char *s;
   const XML_Char *filename;
   XML_Parser entParser = XML_ExternalEntityParserCreate(parser, context, 0);
   int filemapRes;
   PROCESS_ARGS args;
+  UNUSED_P(publicId);
   args.retPtr = &result;
   args.parser = entParser;
   filename = resolveSystemId(base, systemId, &s);
@@ -144,8 +192,10 @@ externalEntityRefFilemap(XML_Parser parser,
     result = 0;
     break;
   case 2:
-    ftprintf(stderr, T("%s: file too large for memory-mapping")
-        T(", switching to streaming\n"), filename);
+    ftprintf(stderr,
+             T("%s: file too large for memory-mapping")
+                 T(", switching to streaming\n"),
+             filename);
     result = processStream(filename, entParser);
     break;
   }
@@ -155,37 +205,36 @@ externalEntityRefFilemap(XML_Parser parser,
 }
 
 static int
-processStream(const XML_Char *filename, XML_Parser parser)
-{
-  /* passing NULL for filename means read intput from stdin */
-  int fd = 0;   /* 0 is the fileno for stdin */
+processStream(const XML_Char *filename, XML_Parser parser) {
+  /* passing NULL for filename means read input from stdin */
+  int fd = 0; /* 0 is the fileno for stdin */
 
   if (filename != NULL) {
-    fd = topen(filename, O_BINARY|O_RDONLY);
+    fd = topen(filename, O_BINARY | O_RDONLY);
     if (fd < 0) {
       tperror(filename);
       return 0;
     }
   }
   for (;;) {
-    int nread;
-    char *buf = (char *)XML_GetBuffer(parser, READ_SIZE);
-    if (!buf) {
+    EXPAT_read_count_t nread;
+    char *buf = (char *)XML_GetBuffer(parser, g_read_size_bytes);
+    if (! buf) {
       if (filename != NULL)
         close(fd);
       ftprintf(stderr, T("%s: out of memory\n"),
-               filename != NULL ? filename : "xmlwf");
+               filename != NULL ? filename : T("xmlwf"));
       return 0;
     }
-    nread = read(fd, buf, READ_SIZE);
+    nread = EXPAT_read(fd, buf, (EXPAT_read_req_t)g_read_size_bytes);
     if (nread < 0) {
-      tperror(filename != NULL ? filename : "STDIN");
+      tperror(filename != NULL ? filename : T("STDIN"));
       if (filename != NULL)
         close(fd);
       return 0;
     }
-    if (XML_ParseBuffer(parser, nread, nread == 0) == XML_STATUS_ERROR) {
-      reportError(parser, filename != NULL ? filename : "STDIN");
+    if (XML_ParseBuffer(parser, (int)nread, nread == 0) == XML_STATUS_ERROR) {
+      reportError(parser, filename != NULL ? filename : T("STDIN"));
       if (filename != NULL)
         close(fd);
       return 0;
@@ -193,23 +242,21 @@ processStream(const XML_Char *filename, XML_Parser parser)
     if (nread == 0) {
       if (filename != NULL)
         close(fd);
-      break;;
+      break;
     }
   }
   return 1;
 }
 
 static int
-externalEntityRefStream(XML_Parser parser,
-                        const XML_Char *context,
-                        const XML_Char *base,
-                        const XML_Char *systemId,
-                        const XML_Char *UNUSED_P(publicId))
-{
+externalEntityRefStream(XML_Parser parser, const XML_Char *context,
+                        const XML_Char *base, const XML_Char *systemId,
+                        const XML_Char *publicId) {
   XML_Char *s;
   const XML_Char *filename;
   int ret;
   XML_Parser entParser = XML_ExternalEntityParserCreate(parser, context, 0);
+  UNUSED_P(publicId);
   filename = resolveSystemId(base, systemId, &s);
   XML_SetBase(entParser, filename);
   ret = processStream(filename, entParser);
@@ -218,23 +265,19 @@ externalEntityRefStream(XML_Parser parser,
   return ret;
 }
 
-int
-XML_ProcessFile(XML_Parser parser,
-                const XML_Char *filename,
-                unsigned flags)
-{
+bool
+XML_ProcessFile(XML_Parser parser, const XML_Char *filename, unsigned flags) {
   int result;
 
-  if (!XML_SetBase(parser, filename)) {
+  if (! XML_SetBase(parser, filename)) {
     ftprintf(stderr, T("%s: out of memory"), filename);
     exit(1);
   }
 
   if (flags & XML_EXTERNAL_ENTITIES)
-      XML_SetExternalEntityRefHandler(parser,
-                                      (flags & XML_MAP_FILE)
-                                      ? externalEntityRefFilemap
-                                      : externalEntityRefStream);
+    XML_SetExternalEntityRefHandler(parser, (flags & XML_MAP_FILE)
+                                                ? externalEntityRefFilemap
+                                                : externalEntityRefStream);
   if (flags & XML_MAP_FILE) {
     int filemapRes;
     PROCESS_ARGS args;
@@ -246,13 +289,14 @@ XML_ProcessFile(XML_Parser parser,
       result = 0;
       break;
     case 2:
-      ftprintf(stderr, T("%s: file too large for memory-mapping")
-          T(", switching to streaming\n"), filename);
+      ftprintf(stderr,
+               T("%s: file too large for memory-mapping")
+                   T(", switching to streaming\n"),
+               filename);
       result = processStream(filename, parser);
       break;
     }
-  }
-  else
+  } else
     result = processStream(filename, parser);
-  return result;
+  return (bool)result;
 }
